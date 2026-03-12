@@ -890,24 +890,28 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.6rem,2.4vw,2.6rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
               <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
               <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
-              <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
+              <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.5)", lineHeight:1.9, margin:0 }}>{p.body}</p>
             </div>
           );
 
           const statCol = (
-            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"8vw":"48px"} 56px ${isA?"48px":"8vw"}`, position:"relative", zIndex:1, gap:"16px" }}>
-              <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
-              <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
+            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"8vw":"48px"} 56px ${isA?"48px":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
+              {/* Stat + label inline */}
+              <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"baseline", gap:"16px" }}>
+                <div style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
+                <p style={{ fontSize:"clamp(0.85rem,1vw,1rem)", color:"rgba(255,255,255,0.45)", lineHeight:1.4, maxWidth:"160px", margin:0 }}>{p.statLabel}</p>
+              </div>
               <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
-              <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
+              {/* Bullets in a box */}
+              <div className="ru" style={{ animationDelay:"0.18s", display:"flex", flexDirection:"column", gap:"0", border:`1px solid ${rgba(brand,0.25)}`, borderRadius:"8px", overflow:"hidden", background:rgba(brand,0.05) }}>
                 {p.bullets.map((b,bi) => (
-                  <div key={bi} className="ru" style={{ animationDelay:`${0.18+bi*0.06}s`, display:"flex", gap:"14px", alignItems:"flex-start" }}>
-                    <div style={{ width:"20px", height:"1px", background:rgba(brand,0.6), flexShrink:0, marginTop:"9px" }} />
-                    <p style={{ fontSize:"0.9rem", color:"rgba(255,255,255,0.36)", lineHeight:1.65, margin:0 }}>{b}</p>
+                  <div key={bi} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px", borderTop: bi>0 ? `1px solid ${rgba(brand,0.15)}` : "none" }}>
+                    <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight, flexShrink:0, marginTop:"7px" }} />
+                    <p style={{ fontSize:"clamp(0.9rem,1.05vw,1rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.6, margin:0 }}>{b}</p>
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.1)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
+              <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.1)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
             </div>
           );
 
