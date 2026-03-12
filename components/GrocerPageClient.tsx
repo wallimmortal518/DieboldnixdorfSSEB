@@ -128,6 +128,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         @keyframes labelShimmer  { from{background-position:-200% center} to{background-position:200% center} }
         @keyframes iconPulse     { 0%,100%{transform:scale(1)} 50%{transform:scale(1.35)} }
         @keyframes statBreathe   { 0%,100%{text-shadow:0 0 20px var(--sb-color,rgba(124,58,237,.4))} 50%{text-shadow:0 0 48px var(--sb-color,rgba(124,58,237,.7)),0 0 90px var(--sb-color,rgba(124,58,237,.25))} }
+        @keyframes bulletBoxGlow { 0%,100%{box-shadow:0 0 0 1px var(--bb-color,rgba(124,58,237,.1)),0 0 12px var(--bb-color,rgba(124,58,237,.15)),0 0 24px var(--bb-color,rgba(124,58,237,.08))} 50%{box-shadow:0 0 0 1px var(--bb-color,rgba(124,58,237,.35)),0 0 20px var(--bb-color,rgba(124,58,237,.35)),0 0 44px var(--bb-color,rgba(124,58,237,.18))} }
         @keyframes borderPulse   { 0%,100%{border-top-color:rgba(124,58,237,.25);box-shadow:none} 50%{border-top-color:rgba(124,58,237,.75);box-shadow:0 -2px 16px rgba(124,58,237,.2)} }
         @keyframes stripFlash    { 0%,100%{opacity:.7} 50%{opacity:1} }
         @keyframes fadeUpPanel   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
@@ -942,7 +943,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               </div>
               <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
               {/* Bullets in a box */}
-              <div className="ru" style={{ animationDelay:"0.18s", display:"flex", flexDirection:"column", gap:"0", border:`1px solid ${rgba(brand,0.25)}`, borderRadius:"8px", overflow:"hidden", background:rgba(brand,0.05) }}>
+              <div className="ru" style={{ animationDelay:"0.18s", display:"flex", flexDirection:"column", gap:"0", border:`1px solid ${rgba(brand,0.35)}`, borderRadius:"8px", overflow:"hidden", background:rgba(brand,0.05), animation:"bulletBoxGlow 2.5s ease-in-out infinite", "--bb-color":rgba(brand,0.4) } as React.CSSProperties}>
                 {p.bullets.map((b,bi) => (
                   <div key={bi} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px" }}>
                     <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight, flexShrink:0, marginTop:"7px" }} />
