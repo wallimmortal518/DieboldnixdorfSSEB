@@ -891,7 +891,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
           </div>
           <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 8vw 56px 48px", position:"relative", zIndex:1, gap:"16px" }}>
-            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(5rem,12vw,13rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
+            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
             <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
             <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
             <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
@@ -922,7 +922,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
           </div>
           <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 8vw 56px 48px", position:"relative", zIndex:1, gap:"16px" }}>
-            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(5rem,12vw,13rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
+            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
             <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
             <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
             <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
@@ -953,7 +953,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
           </div>
           <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 8vw 56px 48px", position:"relative", zIndex:1, gap:"16px" }}>
-            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(5rem,12vw,13rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
+            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
             <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
             <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
             <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
