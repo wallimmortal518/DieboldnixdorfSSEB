@@ -19,6 +19,45 @@ function lighten(hex: string): string {
   return `rgb(${r},${g},${b})`;
 }
 
+function TypewriterTitle({ text, style }: { text: string; style?: React.CSSProperties }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  const [displayed, setDisplayed] = useState("");
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); obs.disconnect(); } },
+      { threshold: 0.5 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started) return;
+    setDisplayed("");
+    let i = 0;
+    const speed = Math.max(18, Math.min(38, 1800 / text.length));
+    const timer = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) clearInterval(timer);
+    }, speed);
+    return () => clearInterval(timer);
+  }, [started, text]);
+
+  return (
+    <h2 ref={ref} style={style}>
+      {displayed}
+      {displayed.length < text.length && (
+        <span style={{ borderRight:"2px solid currentColor", marginLeft:"2px", animation:"blink 0.7s step-end infinite" }}>&nbsp;</span>
+      )}
+    </h2>
+  );
+}
+
 type Theme = "theme1" | "theme2";
 
 export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
@@ -887,7 +926,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>Finding {p.number}</span>
                 <span style={{ color:"rgba(255,255,255,0.2)", fontSize:"11px" }}>/ {total}</span>
               </div>
-              <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
+              <TypewriterTitle text={p.title} style={{ fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }} />
               <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
               <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
               <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.5)", lineHeight:1.9, margin:0 }}>{p.body}</p>
@@ -905,7 +944,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               {/* Bullets in a box */}
               <div className="ru" style={{ animationDelay:"0.18s", display:"flex", flexDirection:"column", gap:"0", border:`1px solid ${rgba(brand,0.25)}`, borderRadius:"8px", overflow:"hidden", background:rgba(brand,0.05) }}>
                 {p.bullets.map((b,bi) => (
-                  <div key={bi} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px", borderTop: bi>0 ? `1px solid ${rgba(brand,0.15)}` : "none" }}>
+                  <div key={bi} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px" }}>
                     <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight, flexShrink:0, marginTop:"7px" }} />
                     <p style={{ fontSize:"clamp(0.9rem,1.05vw,1rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.6, margin:0 }}>{b}</p>
                   </div>
