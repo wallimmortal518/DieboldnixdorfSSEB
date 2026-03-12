@@ -872,102 +872,52 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
         </section>
 
-        {/* ══ T1 · FINDING 01 ══════════════════════════════════════════════════
-            Single layout for all 6 findings.
-            Left col (55%): Title → Hook → Body paragraph.
-            Right col (45%): Stat (large) → Stat label → Bullets.
+        {/* ══ T1 · FINDINGS 01–06 — alternating Layout A / Layout B ══════════
+            Layout A (odd): text left 55%, stat+bullets right 45%
+            Layout B (even): stat+bullets left 45%, text right 55%
+            Both follow the same content flow: Title → Hook → Body → Stat → Bullets
         ═════════════════════════════════════════════════════════════════════= */}
-        {grocer.provocations[0] && (() => { const p = grocer.provocations[0]; return (
-        <section ref={el => { sectionRefs.current[1] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"grid", gridTemplateColumns:"55% 45%", position:"relative", overflow:"hidden", background:"#080c12" }}>
-          <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 55% 65% at 100% 50%,${rgba(brand,0.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
-          <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 48px 56px 8vw", borderRight:`1px solid rgba(255,255,255,0.06)`, position:"relative", zIndex:1, gap:"20px" }}>
-            <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
-              <span style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:rgba(brand,0.8) }}>Finding {p.number}</span>
-              <span style={{ color:"rgba(255,255,255,0.14)", fontSize:"10px" }}>/ {total}</span>
-            </div>
-            <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.6rem,2.4vw,2.6rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
-            <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
-            <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${rgba(brand,0.4)},transparent)` }} />
-            <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
-          </div>
-          <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 8vw 56px 48px", position:"relative", zIndex:1, gap:"16px" }}>
-            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
-            <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
-            <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
-            <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
-              {p.bullets.map((b,bi) => (
-                <div key={bi} className="ru" style={{ animationDelay:`${0.18+bi*0.06}s`, display:"flex", gap:"14px", alignItems:"flex-start" }}>
-                  <div style={{ width:"20px", height:"1px", background:rgba(brand,0.6), flexShrink:0, marginTop:"9px" }} />
-                  <p style={{ fontSize:"0.9rem", color:"rgba(255,255,255,0.36)", lineHeight:1.65, margin:0 }}>{b}</p>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.1)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
-          </div>
-        </section>
-        ); })()}
+        {[0,1,2,3,4,5].map((idx) => grocer.provocations[idx] && (() => {
+          const p = grocer.provocations[idx];
+          const isA = idx % 2 === 0; // Layout A on odd findings (1,3,5), B on even (2,4,6)
 
-        {/* ══ T1 · FINDING 02 ══════════════════════════════════════════════════ */}
-        {grocer.provocations[1] && (() => { const p = grocer.provocations[1]; return (
-        <section ref={el => { sectionRefs.current[2] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"grid", gridTemplateColumns:"55% 45%", position:"relative", overflow:"hidden", background:"#080c12" }}>
-          <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 55% 65% at 100% 50%,${rgba(brand,0.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
-          <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 48px 56px 8vw", borderRight:`1px solid rgba(255,255,255,0.06)`, position:"relative", zIndex:1, gap:"20px" }}>
-            <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
-              <span style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:rgba(brand,0.8) }}>Finding {p.number}</span>
-              <span style={{ color:"rgba(255,255,255,0.14)", fontSize:"10px" }}>/ {total}</span>
+          const textCol = (
+            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"48px":"8vw"} 56px ${isA?"8vw":"48px"}`, borderRight:isA?`1px solid rgba(255,255,255,0.06)`:"none", borderLeft:isA?"none":`1px solid rgba(255,255,255,0.06)`, position:"relative", zIndex:1, gap:"20px" }}>
+              <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
+                <span style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:rgba(brand,0.8) }}>Finding {p.number}</span>
+                <span style={{ color:"rgba(255,255,255,0.14)", fontSize:"10px" }}>/ {total}</span>
+              </div>
+              <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.6rem,2.4vw,2.6rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
+              <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
+              <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
+              <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
             </div>
-            <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.6rem,2.4vw,2.6rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
-            <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
-            <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${rgba(brand,0.4)},transparent)` }} />
-            <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
-          </div>
-          <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 8vw 56px 48px", position:"relative", zIndex:1, gap:"16px" }}>
-            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
-            <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
-            <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
-            <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
-              {p.bullets.map((b,bi) => (
-                <div key={bi} className="ru" style={{ animationDelay:`${0.18+bi*0.06}s`, display:"flex", gap:"14px", alignItems:"flex-start" }}>
-                  <div style={{ width:"20px", height:"1px", background:rgba(brand,0.6), flexShrink:0, marginTop:"9px" }} />
-                  <p style={{ fontSize:"0.9rem", color:"rgba(255,255,255,0.36)", lineHeight:1.65, margin:0 }}>{b}</p>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.1)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
-          </div>
-        </section>
-        ); })()}
+          );
 
-        {/* ══ T1 · FINDINGS 03–06 — same single layout ══════════════════ */}
-        {[2,3,4,5].map((idx) => grocer.provocations[idx] && (() => { const p = grocer.provocations[idx]; return (
-        <section key={idx} ref={el => { sectionRefs.current[idx+1] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"grid", gridTemplateColumns:"55% 45%", position:"relative", overflow:"hidden", background:"#080c12" }}>
-          <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 55% 65% at 100% 50%,${rgba(brand,0.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
-          <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 48px 56px 8vw", borderRight:`1px solid rgba(255,255,255,0.06)`, position:"relative", zIndex:1, gap:"20px" }}>
-            <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
-              <span style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:rgba(brand,0.8) }}>Finding {p.number}</span>
-              <span style={{ color:"rgba(255,255,255,0.14)", fontSize:"10px" }}>/ {total}</span>
+          const statCol = (
+            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"8vw":"48px"} 56px ${isA?"48px":"8vw"}`, position:"relative", zIndex:1, gap:"16px" }}>
+              <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
+              <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
+              <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
+              <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
+                {p.bullets.map((b,bi) => (
+                  <div key={bi} className="ru" style={{ animationDelay:`${0.18+bi*0.06}s`, display:"flex", gap:"14px", alignItems:"flex-start" }}>
+                    <div style={{ width:"20px", height:"1px", background:rgba(brand,0.6), flexShrink:0, marginTop:"9px" }} />
+                    <p style={{ fontSize:"0.9rem", color:"rgba(255,255,255,0.36)", lineHeight:1.65, margin:0 }}>{b}</p>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.1)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
             </div>
-            <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.6rem,2.4vw,2.6rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
-            <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
-            <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${rgba(brand,0.4)},transparent)` }} />
-            <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.42)", lineHeight:1.9, margin:0 }}>{p.body}</p>
-          </div>
-          <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:"56px 8vw 56px 48px", position:"relative", zIndex:1, gap:"16px" }}>
-            <div className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
-            <p className="ru" style={{ animationDelay:"0.14s", fontSize:"12px", color:"rgba(255,255,255,0.3)", lineHeight:1.5, maxWidth:"240px" }}>{p.statLabel}</p>
-            <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
-            <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
-              {p.bullets.map((b,bi) => (
-                <div key={bi} className="ru" style={{ animationDelay:`${0.18+bi*0.06}s`, display:"flex", gap:"14px", alignItems:"flex-start" }}>
-                  <div style={{ width:"20px", height:"1px", background:rgba(brand,0.6), flexShrink:0, marginTop:"9px" }} />
-                  <p style={{ fontSize:"0.9rem", color:"rgba(255,255,255,0.36)", lineHeight:1.65, margin:0 }}>{b}</p>
-                </div>
-              ))}
-            </div>
-            <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.1)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
-          </div>
-        </section>
-        ); })())}
+          );
+
+          return (
+            <section key={idx} ref={el => { sectionRefs.current[idx+1] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"grid", gridTemplateColumns:isA?"55% 45%":"45% 55%", position:"relative", overflow:"hidden", background:"#080c12" }}>
+              <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 55% 65% at ${isA?"100%":"0%"} 50%,${rgba(brand,0.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
+              {isA ? <>{textCol}{statCol}</> : <>{statCol}{textCol}</>}
+            </section>
+          );
+        })())}
         {/* ══ END ═══════════════════════════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[total + 1] = el; }}
