@@ -897,9 +897,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           const statCol = (
             <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"8vw":"48px"} 56px ${isA?"48px":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
               {/* Stat + label inline */}
-              <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"center", gap:"16px" }}>
+              <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"center", gap:"24px" }}>
                 <div style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite", flexShrink:0 } as React.CSSProperties}>{p.stat}</div>
-                <p style={{ fontSize:"clamp(0.85rem,1vw,1rem)", color:"rgba(255,255,255,0.45)", lineHeight:1.4, maxWidth:"160px", margin:0 }}>{p.statLabel}</p>
+                <p style={{ fontSize:"clamp(1rem,1.15vw,1.15rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.4, maxWidth:"160px", margin:0 }}>{p.statLabel}</p>
               </div>
               <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
               {/* Bullets in a box */}
@@ -911,7 +911,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.1)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
+              <p style={{ fontSize:"11px", color:"rgba(255,255,255,0.2)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
             </div>
           );
 
