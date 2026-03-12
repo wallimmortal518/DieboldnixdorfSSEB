@@ -897,8 +897,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           const statCol = (
             <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"8vw":"48px"} 56px ${isA?"48px":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
               {/* Stat + label inline */}
-              <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"baseline", gap:"16px" }}>
-                <div style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:0.85, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</div>
+              <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"center", gap:"16px" }}>
+                <div style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite", flexShrink:0 } as React.CSSProperties}>{p.stat}</div>
                 <p style={{ fontSize:"clamp(0.85rem,1vw,1rem)", color:"rgba(255,255,255,0.45)", lineHeight:1.4, maxWidth:"160px", margin:0 }}>{p.statLabel}</p>
               </div>
               <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
