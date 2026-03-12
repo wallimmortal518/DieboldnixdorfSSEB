@@ -921,7 +921,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           const isA = idx % 2 === 0; // Layout A on odd findings (1,3,5), B on even (2,4,6)
 
           const textCol = (
-            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"48px":"8vw"} 56px ${isA?"8vw":"48px"}`, borderRight:isA?`1px solid rgba(255,255,255,0.06)`:"none", borderLeft:isA?"none":`1px solid rgba(255,255,255,0.06)`, position:"relative", zIndex:1, gap:"20px" }}>
+            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"48px":"8vw"} 56px ${isA?"8vw":"48px"}`, borderRight:"none", borderLeft:"none", position:"relative", zIndex:1, gap:"20px" }}>
               <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
                 <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>Finding {p.number}</span>
                 <span style={{ color:"rgba(255,255,255,0.2)", fontSize:"11px" }}>/ {total}</span>
