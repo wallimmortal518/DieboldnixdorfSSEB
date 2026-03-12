@@ -884,10 +884,10 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           const textCol = (
             <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"48px":"8vw"} 56px ${isA?"8vw":"48px"}`, borderRight:isA?`1px solid rgba(255,255,255,0.06)`:"none", borderLeft:isA?"none":`1px solid rgba(255,255,255,0.06)`, position:"relative", zIndex:1, gap:"20px" }}>
               <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
-                <span style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:rgba(brand,0.8) }}>Finding {p.number}</span>
-                <span style={{ color:"rgba(255,255,255,0.14)", fontSize:"10px" }}>/ {total}</span>
+                <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>Finding {p.number}</span>
+                <span style={{ color:"rgba(255,255,255,0.2)", fontSize:"11px" }}>/ {total}</span>
               </div>
-              <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.6rem,2.4vw,2.6rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
+              <h2 className="ru" style={{ animationDelay:"0.08s", fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }}>{p.title}</h2>
               <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
               <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
               <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.5)", lineHeight:1.9, margin:0 }}>{p.body}</p>
