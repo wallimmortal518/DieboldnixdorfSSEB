@@ -37,6 +37,7 @@ export default function LoginForm() {
       return;
     }
 
+    sessionStorage.setItem("sseb_grocer_id", grocerId);
     router.push(`/${grocerId}`);
   }
 

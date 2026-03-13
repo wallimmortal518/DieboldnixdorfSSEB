@@ -99,3 +99,44 @@
 .animate-delay-300 { animation-delay: 0.3s; opacity: 0; }
 .animate-delay-400 { animation-delay: 0.4s; opacity: 0; }
 .animate-delay-500 { animation-delay: 0.5s; opacity: 0; }
+
+/* Running border glow for bullet box */
+@property --bb-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes bbSpin { to { --bb-angle: 360deg; } }
+
+.bullet-box-wrap {
+  position: relative;
+  border-radius: 8px;
+  padding: 1px;
+  isolation: isolate;
+}
+
+.bullet-box-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--bb-angle),
+    transparent 0%,
+    transparent 68%,
+    var(--bb-color, rgba(124,58,237,0.9)) 80%,
+    var(--bb-color, rgba(124,58,237,0.9)) 85%,
+    transparent 94%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: bbSpin 3s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}

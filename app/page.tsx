@@ -1,3 +1,4 @@
+import Image from "next/image";
 import LoginForm from "@/components/LoginForm";
 import NetworkBackground from "@/components/NetworkBackground";
 
@@ -15,12 +16,14 @@ export default function HomePage() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
       >
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-white font-black tracking-tighter text-sm">INCISIV</span>
-            <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "10px" }}>×</span>
-            <span className="font-semibold tracking-tight text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
-              DIEBOLD NIXDORF
-            </span>
+          <div className="flex items-center">
+            <Image
+              src="/diebold-nixdorf-logo.png"
+              alt="Diebold Nixdorf"
+              width={64}
+              height={21}
+              style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.9 }}
+            />
           </div>
           <div
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full"
@@ -34,8 +37,8 @@ export default function HomePage() {
               className="w-1.5 h-1.5 rounded-full"
               style={{ background: "rgba(255,255,255,0.9)", animation: "pulse 2s ease-in-out infinite" }}
             />
-            <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>
-              2025 Benchmark Report
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.9)" }}>
+              Self-Service Excellence Benchmark
             </span>
           </div>
         </div>
@@ -47,20 +50,7 @@ export default function HomePage() {
 
           {/* Eyebrow */}
           <div className="text-center mb-6">
-            <div
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 animate-fade-up"
-              style={{
-                background: "rgba(255,255,255,0.1)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.9)" }}>
-                Self-Service Excellence Benchmark
-              </span>
-            </div>
-
-            <h1 className="animate-fade-up animate-delay-100 text-4xl sm:text-5xl font-black tracking-tight leading-[1.08] text-white mb-4">
+            <h1 className="animate-fade-up text-4xl sm:text-5xl font-black tracking-tight leading-[1.08] text-white mb-4">
               Your Self-Service{" "}
               <span style={{
                 background: "linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.7) 100%)",
@@ -124,11 +114,7 @@ export default function HomePage() {
         style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
       >
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <span className="font-black text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>INCISIV</span>
-            <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "10px" }}>×</span>
-            <span className="font-semibold text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>DIEBOLD NIXDORF</span>
-          </div>
+          <div />
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
             Research conducted June–July 2025 · © 2025 Incisiv. All rights reserved.
           </p>

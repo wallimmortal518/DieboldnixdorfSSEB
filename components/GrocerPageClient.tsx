@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import type { GrocerData } from "@/lib/grocer-data";
 import StatViz from "@/components/StatViz";
 
@@ -19,9 +21,8 @@ function lighten(hex: string): string {
   return `rgb(${r},${g},${b})`;
 }
 
-function TypewriterTitle({ text, style }: { text: string; style?: React.CSSProperties }) {
+function WordFadeTitle({ text, style }: { text: string; style?: React.CSSProperties }) {
   const ref = useRef<HTMLHeadingElement>(null);
-  const [displayed, setDisplayed] = useState("");
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
@@ -29,7 +30,39 @@ function TypewriterTitle({ text, style }: { text: string; style?: React.CSSPrope
     if (!el) return;
     const obs = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setStarted(true); obs.disconnect(); } },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const words = text.split(" ");
+  return (
+    <h2 ref={ref} style={{ ...style, overflow: "hidden" }}>
+      {words.map((word, i) => (
+        <span key={i} style={{
+          display: "inline-block",
+          marginRight: "0.28em",
+          opacity: started ? 1 : 0,
+          transform: started ? "translateY(0)" : "translateY(18px)",
+          transition: `opacity 0.5s cubic-bezier(0.16,1,0.3,1) ${i * 55}ms, transform 0.5s cubic-bezier(0.16,1,0.3,1) ${i * 55}ms`,
+        }}>{word}</span>
+      ))}
+    </h2>
+  );
+}
+
+function CountUpStat({ value, suffix = "%", style }: { value: number; suffix?: string; style?: React.CSSProperties }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [digits, setDigits] = useState<number[]>(() => String(value).split("").map(Number));
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); obs.disconnect(); } },
+      { threshold: 0.4 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -37,32 +70,45 @@ function TypewriterTitle({ text, style }: { text: string; style?: React.CSSPrope
 
   useEffect(() => {
     if (!started) return;
-    setDisplayed("");
-    let i = 0;
-    const speed = Math.max(18, Math.min(38, 1800 / text.length));
-    const timer = setInterval(() => {
-      i++;
-      setDisplayed(text.slice(0, i));
-      if (i >= text.length) clearInterval(timer);
-    }, speed);
-    return () => clearInterval(timer);
-  }, [started, text]);
+    const target = String(value).split("").map(Number);
+    const totalTicks = 18;
+    let tick = 0;
+    const interval = setInterval(() => {
+      tick++;
+      const progress = tick / totalTicks;
+      setDigits(target.map((d, i) => {
+        // Each digit locks in staggered — earlier digits lock sooner
+        const lockAt = (i + 1) / target.length;
+        if (progress >= lockAt) return d;
+        return Math.floor(Math.random() * 10);
+      }));
+      if (tick >= totalTicks) {
+        setDigits(target);
+        clearInterval(interval);
+      }
+    }, 55);
+    return () => clearInterval(interval);
+  }, [started, value]);
 
-  return (
-    <h2 ref={ref} style={style}>
-      {displayed}
-      {displayed.length < text.length && (
-        <span style={{ borderRight:"2px solid currentColor", marginLeft:"2px", animation:"blink 0.7s step-end infinite" }}>&nbsp;</span>
-      )}
-    </h2>
-  );
+  return <span ref={ref} style={{ ...style, fontVariantNumeric:"tabular-nums" }}>{digits.join("")}{suffix}</span>;
 }
 
 type Theme = "theme1" | "theme2";
 
 export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
+  const router = useRouter();
+
+  // Auth guard: ensure the URL grocer matches what the user logged in as
+  useEffect(() => {
+    const authorizedId = sessionStorage.getItem("sseb_grocer_id");
+    if (!authorizedId) {
+      router.replace("/");
+    } else if (authorizedId !== grocer.id) {
+      router.replace(`/${authorizedId}`);
+    }
+  }, [grocer.id, router]);
+
   const [theme, setTheme] = useState<Theme>("theme1");
-  const [themeOpen, setThemeOpen] = useState(false);
   const brand = grocer.accentColor;
   const brandLight = lighten(brand);
   const total = grocer.provocations.length;
@@ -112,7 +158,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
   }, [isT2]);
 
   return (
-    <div style={{ background: isT2 ? "#080614" : "#080c12", position: "relative", cursor: "none" }}>
+    <div style={{ background: theme === "theme2" ? "#f8f8f6" : "#080c12", position: "relative", cursor: "none" }}>
       <style>{`
         /* ── T1 animations ── */
         @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
@@ -128,8 +174,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         @keyframes labelShimmer  { from{background-position:-200% center} to{background-position:200% center} }
         @keyframes iconPulse     { 0%,100%{transform:scale(1)} 50%{transform:scale(1.35)} }
         @keyframes statBreathe   { 0%,100%{text-shadow:0 0 20px var(--sb-color,rgba(124,58,237,.4))} 50%{text-shadow:0 0 48px var(--sb-color,rgba(124,58,237,.7)),0 0 90px var(--sb-color,rgba(124,58,237,.25))} }
-        @keyframes bulletBoxGlow { 0%,100%{box-shadow:0 0 0 1px var(--bb-color,rgba(124,58,237,.1)),0 0 12px var(--bb-color,rgba(124,58,237,.15)),0 0 24px var(--bb-color,rgba(124,58,237,.08))} 50%{box-shadow:0 0 0 1px var(--bb-color,rgba(124,58,237,.35)),0 0 20px var(--bb-color,rgba(124,58,237,.35)),0 0 44px var(--bb-color,rgba(124,58,237,.18))} }
-        @keyframes borderPulse   { 0%,100%{border-top-color:rgba(124,58,237,.25);box-shadow:none} 50%{border-top-color:rgba(124,58,237,.75);box-shadow:0 -2px 16px rgba(124,58,237,.2)} }
+@keyframes borderPulse   { 0%,100%{border-top-color:rgba(124,58,237,.25);box-shadow:none} 50%{border-top-color:rgba(124,58,237,.75);box-shadow:0 -2px 16px rgba(124,58,237,.2)} }
         @keyframes stripFlash    { 0%,100%{opacity:.7} 50%{opacity:1} }
         @keyframes fadeUpPanel   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
 
@@ -235,91 +280,91 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       {/* ── NAV ── */}
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-        height: "44px", padding: "0 56px",
+        height: "52px", padding: "0 56px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: isT2 ? "rgba(8,6,20,0.95)" : "rgba(8,12,18,0.95)",
+        background: theme === "theme2" ? "rgba(248,248,246,0.95)" : "rgba(8,12,18,0.95)",
         backdropFilter: "blur(16px)",
-        borderBottom: isT2 ? "1px solid rgba(109,40,217,0.18)" : "1px solid rgba(255,255,255,0.04)",
+        borderBottom: theme === "theme2" ? "1px solid rgba(0,0,0,0.07)" : "1px solid rgba(255,255,255,0.04)",
       }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: theme === "theme2" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.22)", textDecoration: "none" }}>
           <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
           <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Back</span>
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: brand }} />
-          <span style={{ fontSize: "10px", fontWeight: 800, color: brandLight, letterSpacing: "0.08em" }}>
-            {grocer.shortName.toUpperCase()}
-          </span>
-          <span style={{ color: "rgba(255,255,255,0.1)", margin: "0 2px" }}>·</span>
-          <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em" }}>
-            Self-Service Excellence Benchmark
-          </span>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={36} height={27} style={{ objectFit: "contain", filter: theme === "theme2" ? "none" : "brightness(0) invert(1)", opacity: theme === "theme2" ? 0.7 : 0.75, display: "block" }} />
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <span style={{ fontSize: "9px", fontWeight: 800, color: "rgba(255,255,255,0.12)", letterSpacing: "0.1em" }}>INCISIV</span>
-            <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.06)" }}>×</span>
-            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.08)", letterSpacing: "0.06em" }}>DIEBOLD NIXDORF</span>
-          </div>
+          {/* ── Logout ── */}
+          <button
+            onClick={() => { sessionStorage.removeItem("sseb_grocer_id"); router.replace("/"); }}
+            title="Log out"
+            style={{
+              display: "flex", alignItems: "center", gap: "5px",
+              padding: "4px 10px", borderRadius: "6px", border: "none", cursor: "pointer",
+              background: theme === "theme2" ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.07)",
+              color: theme === "theme2" ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)",
+              fontSize: "9px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = theme === "theme2" ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.85)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = theme === "theme2" ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)"; }}
+          >
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Logout
+          </button>
 
-          {/* ── Theme Dropdown ── */}
-          <div style={{ position: "relative" }}>
-            <button
-              onClick={() => setThemeOpen(o => !o)}
-              style={{
-                display: "flex", alignItems: "center", gap: "5px",
-                padding: "4px 10px", borderRadius: "5px",
-                background: isT2 ? "rgba(109,40,217,0.15)" : "rgba(255,255,255,0.05)",
-                border: isT2 ? "1px solid rgba(109,40,217,0.35)" : "1px solid rgba(255,255,255,0.08)",
-                color: isT2 ? "#a78bfa" : "rgba(255,255,255,0.4)",
-                cursor: "pointer", fontSize: "9px", fontWeight: 700, letterSpacing: "0.08em",
-              }}
-            >
-              <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <circle cx="12" cy="12" r="3" /><path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-              </svg>
-              {theme === "theme1" ? "Theme 1" : "Theme 2"}
-              <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} style={{ opacity: 0.5, transform: themeOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {themeOpen && (
-              <div style={{
-                position: "absolute", top: "calc(100% + 6px)", right: 0,
-                background: "#0e0b1e", border: "1px solid rgba(109,40,217,0.25)",
-                borderRadius: "8px", overflow: "hidden", minWidth: "110px",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-              }}>
-                {(["theme1", "theme2"] as Theme[]).map(t => (
-                  <button key={t} onClick={() => { setTheme(t); setThemeOpen(false); }} style={{
-                    display: "flex", alignItems: "center", gap: "7px",
-                    width: "100%", padding: "8px 12px",
-                    background: theme === t ? "rgba(109,40,217,0.15)" : "none",
-                    border: "none", cursor: "pointer", textAlign: "left",
-                    color: theme === t ? "#a78bfa" : "rgba(255,255,255,0.35)",
-                    fontSize: "9px", fontWeight: 700, letterSpacing: "0.08em",
-                    transition: "background 0.15s",
-                  }}
-                    onMouseEnter={e => { if (theme !== t) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
-                    onMouseLeave={e => { if (theme !== t) (e.currentTarget as HTMLElement).style.background = "none"; }}
-                  >
-                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: theme === t ? "#a78bfa" : "rgba(255,255,255,0.15)", flexShrink: 0 }} />
-                    {t === "theme1" ? "Theme 1" : "Theme 2"}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* ── Dark/Light Toggle ── */}
+          <button
+            onClick={() => setTheme(t => t === "theme1" ? "theme2" : "theme1")}
+            title={isT2 ? "Switch to Dark" : "Switch to Light"}
+            style={{
+              display: "flex", alignItems: "center", gap: "0",
+              padding: "0", borderRadius: "20px", border: "none",
+              background: isT2 ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+              cursor: "pointer", width: "44px", height: "24px", position: "relative",
+              transition: "background 0.2s",
+              flexShrink: 0,
+            }}
+          >
+            {/* Track */}
+            <span style={{
+              position: "absolute", inset: 0, borderRadius: "20px",
+              border: isT2 ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.1)",
+            }} />
+            {/* Thumb */}
+            <span style={{
+              position: "absolute",
+              left: isT2 ? "22px" : "2px",
+              width: "20px", height: "20px", borderRadius: "50%",
+              background: isT2 ? "#1e1b3a" : "#fff",
+              boxShadow: isT2 ? "0 1px 4px rgba(0,0,0,0.4)" : "0 1px 4px rgba(0,0,0,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "left 0.2s cubic-bezier(0.4,0,0.2,1), background 0.2s",
+            }}>
+              {isT2 ? (
+                /* Moon icon */
+                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="rgba(167,139,250,0.9)" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              ) : (
+                /* Sun icon */
+                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="rgba(100,100,120,0.7)" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="4" /><path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                </svg>
+              )}
+            </span>
+          </button>
         </div>
       </nav>
 
       {/* ── PROGRESS ── */}
-      <div style={{ position: "fixed", top: "44px", left: 0, right: 0, height: "1px", background: "rgba(255,255,255,0.03)", zIndex: 50 }}>
+      <div style={{ position: "fixed", top: "52px", left: 0, right: 0, height: "1px", background: theme === "theme2" ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.03)", zIndex: 50 }}>
         <div style={{
           height: "100%",
           width: `${(activeIdx / (totalSections - 1)) * 100}%`,
@@ -337,7 +382,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           <button key={i} onClick={() => scrollTo(i)} style={{
             width: "2px", height: activeIdx === i ? "20px" : "4px",
             borderRadius: "2px", border: "none", padding: 0, cursor: "pointer",
-            background: activeIdx === i ? brand : "rgba(255,255,255,0.08)",
+            background: activeIdx === i ? brand : theme === "theme2" ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.08)",
             transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)",
           }} />
         ))}
@@ -356,6 +401,210 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           position: "relative", zIndex: 2,
         }}
       >
+        {/* ══ LIGHT THEME ══════════════════════════════════════════════════════ */}
+        {theme === "theme2" && (
+          <>
+            {/* LIGHT HERO */}
+            <section
+              ref={el => { sectionRefs.current[0] = el; }}
+              style={{ height: "100vh", scrollSnapAlign: "start", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", background: "#f8f8f6" }}
+            >
+              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 50% 60% at 10% 20%, ${rgba(brand, 0.07)} 0%, transparent 55%)`, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 40% 40% at 90% 80%, ${rgba(brand, 0.05)} 0%, transparent 55%)`, pointerEvents: "none" }} />
+
+              <div className="ru" style={{ animationDelay: "0.02s", padding: "28px 8vw 0", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 2 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ width: "16px", height: "1px", background: brand }} />
+                  <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: rgba(brand, 0.7) }}>SSEB · 2025</span>
+                </div>
+                <span style={{ fontSize: "10px", color: "rgba(0,0,0,0.3)", letterSpacing: "0.06em" }}>Personalized for {grocer.name}</span>
+              </div>
+
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", position: "relative", zIndex: 2, gap: "0" }}>
+                <div className="ru" style={{ animationDelay: "0.06s", fontSize: "clamp(0.7rem,1vw,0.85rem)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: rgba(brand, 0.55), marginBottom: "16px" }}>
+                  {grocer.shortName.toUpperCase()}
+                </div>
+                <h1 className="ru" style={{ animationDelay: "0.1s", fontSize: "clamp(1.8rem,2.8vw,3rem)", fontWeight: 900, color: "#111", lineHeight: 1.0, letterSpacing: "-0.04em", maxWidth: "22ch", marginBottom: "32px" }}>
+                  {grocer.heroHeadline}
+                </h1>
+                <div className="rfi" style={{ animationDelay: "0.14s", height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.5)}, rgba(0,0,0,0.05), transparent)`, maxWidth: "60vw", marginBottom: "32px" }} />
+                <div className="ru" style={{ animationDelay: "0.16s", display: "flex", gap: "0", marginBottom: "36px" }}>
+                  {grocer.contextStat.map((s, i) => (
+                    <div key={i} style={{ paddingRight: "48px", marginRight: "48px", borderRight: i < grocer.contextStat.length - 1 ? "1px solid rgba(0,0,0,0.08)" : "none" }}>
+                      <div style={{ fontSize: "clamp(2.2rem,4vw,4.8rem)", fontWeight: 900, color: i === 0 ? brand : "rgba(0,0,0,0.25)", letterSpacing: "-0.05em", lineHeight: 0.9, marginBottom: "10px" }}>
+                        {s.value}
+                      </div>
+                      <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.35)", lineHeight: 1.5, maxWidth: "200px" }}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="ru" style={{ animationDelay: "0.2s", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "40px" }}>
+                  <p style={{ fontSize: "clamp(0.9rem,1.1vw,1rem)", color: "rgba(0,0,0,0.45)", lineHeight: 1.75, maxWidth: "480px", margin: 0 }}>
+                    {grocer.heroSubheadline}
+                  </p>
+                  <button onClick={() => scrollTo(1)} style={{ flexShrink: 0, padding: "14px 32px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: `0 4px 20px ${rgba(brand, 0.3)}` }}>
+                    View {total} Findings →
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ height: "1px", background: "rgba(0,0,0,0.07)", position: "relative", zIndex: 2 }} />
+              <div style={{ padding: "12px 8vw", display: "flex", justifyContent: "space-between", position: "relative", zIndex: 2 }}>
+                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.3 }} />
+                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.2)" }}>131 retail executives · 2,533 shoppers</span>
+              </div>
+            </section>
+
+            {/* LIGHT FINDINGS */}
+            {[0,1,2,3,4,5].map((idx) => grocer.provocations[idx] && (() => {
+              const p = grocer.provocations[idx];
+              const isA = idx % 2 === 0;
+              const bg = idx % 2 === 0 ? "#ffffff" : "#f4f4f2";
+
+              const textCol = (
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `56px ${isA ? "48px" : "8vw"} 56px ${isA ? "8vw" : "48px"}`, position: "relative", zIndex: 1, gap: "20px" }}>
+                  <div className="ru" style={{ animationDelay: "0.04s", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: brand }}>{p.title}</span>
+                    <span style={{ color: "rgba(0,0,0,0.2)", fontSize: "11px" }}>/ {total}</span>
+                  </div>
+                  <WordFadeTitle text={p.hook} style={{ fontSize: "clamp(1.9rem,2.8vw,3rem)", fontWeight: 900, color: "#111", lineHeight: 1.05, letterSpacing: "-0.04em", margin: 0 }} />
+                  <div className="rfi" style={{ animationDelay: "0.14s", height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.3)}, transparent)` }} />
+                  <p className="ru" style={{ animationDelay: "0.16s", fontSize: "clamp(1rem,1.2vw,1.1rem)", color: "rgba(0,0,0,0.45)", lineHeight: 1.9, margin: 0 }}>{p.body}</p>
+                  <div className="rfi" style={{ animationDelay:"0.2s", display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(0,0,0,0.45)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.5), rgba(75,29,110,0.5), rgba(155,27,42,0.5))", display:"inline-block", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.85), rgba(75,29,110,0.85), rgba(155,27,42,0.85))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(0,0,0,0.75)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.5), rgba(75,29,110,0.5), rgba(155,27,42,0.5))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(0,0,0,0.45)"; }}>
+                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#f8f8f6" }}>{label}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+
+              const statCol = (
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `56px ${isA ? "8vw" : "48px"} 56px ${isA ? "48px" : "8vw"}`, position: "relative", zIndex: 1, gap: "20px" }}>
+                  <div className="ru" style={{ animationDelay: "0.1s", display: "flex", alignItems: "center", gap: "24px" }}>
+                    {(() => {
+                      const vsMatch = p.stat.match(/^(\d+)%\s*vs\.?\s*(\d+)%$/i);
+                      if (vsMatch) {
+                        return (
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexShrink: 0 }}>
+                            <span style={{ fontSize: "clamp(3rem,5vw,5.5rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: brand }}>{vsMatch[1]}%</span>
+                            <span style={{ fontSize: "clamp(0.85rem,1.1vw,1rem)", fontWeight: 600, color: "rgba(0,0,0,0.25)", letterSpacing: "0.06em", textTransform: "uppercase" }}>vs.</span>
+                            <span style={{ fontSize: "clamp(2rem,3.5vw,4rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: "rgba(0,0,0,0.2)" }}>{vsMatch[2]}%</span>
+                          </div>
+                        );
+                      }
+                      const pctMatch = p.stat.match(/^(\d+)%$/);
+                      if (pctMatch) {
+                        return <CountUpStat value={parseInt(pctMatch[1])} style={{ fontSize: "clamp(3.5rem,6vw,7rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: brand, flexShrink: 0 }} />;
+                      }
+                      // Try to extract a numeric prefix + suffix (e.g. "16pts", "$0.10+", "2.5x")
+                      const generalMatch = p.stat.match(/^([\d.]+)(.*)$/);
+                      if (generalMatch && !isNaN(parseFloat(generalMatch[1]))) {
+                        const num = parseFloat(generalMatch[1]);
+                        const sfx = generalMatch[2] || "";
+                        if (Number.isInteger(num)) {
+                          return <CountUpStat value={num} suffix={sfx} style={{ fontSize: "clamp(3.5rem,6vw,7rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: brand, flexShrink: 0 }} />;
+                        }
+                      }
+                      return <div style={{ fontSize: "clamp(3.5rem,6vw,7rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: brand, flexShrink: 0 }}>{p.stat}</div>;
+                    })()}
+                    <p style={{ fontSize: "clamp(1rem,1.15vw,1.15rem)", color: "rgba(0,0,0,0.4)", lineHeight: 1.4, maxWidth: "160px", margin: 0 }}>{p.statLabel}</p>
+                  </div>
+                  <div className="reveal reveal-d2" style={{ height: "1px", background: "rgba(0,0,0,0.07)" }} />
+                  <div className="reveal reveal-d3">
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0", borderRadius: "7px", overflow: "hidden", background: rgba(brand, 0.04), border: `1px solid ${rgba(brand, 0.1)}` }}>
+                      {p.bullets.map((b, bi) => (
+                        <div key={bi} style={{ display: "flex", gap: "14px", alignItems: "flex-start", padding: "14px 18px", borderBottom: bi < p.bullets.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none" }}>
+                          <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: brand, flexShrink: 0, marginTop: "7px" }} />
+                          <p style={{ fontSize: "clamp(0.9rem,1.05vw,1rem)", color: "rgba(0,0,0,0.5)", lineHeight: 1.6, margin: 0 }}>{b}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p style={{ fontSize: "11px", color: "rgba(0,0,0,0.25)", fontStyle: "italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
+                </div>
+              );
+
+              return (
+                <section key={`light-${idx}`} ref={el => { sectionRefs.current[idx + 1] = el; }} style={{ height: "100vh", scrollSnapAlign: "start", display: "grid", gridTemplateColumns: isA ? "55% 45%" : "45% 55%", position: "relative", overflow: "hidden", background: bg }}>
+                  <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 55% 65% at ${isA ? "100%" : "0%"} 50%, ${rgba(brand, 0.05)} 0%, transparent 55%)`, pointerEvents: "none" }} />
+                  {isA ? <>{textCol}{statCol}</> : <>{statCol}{textCol}</>}
+                </section>
+              );
+            })())}
+
+            {/* LIGHT END */}
+            <section
+              ref={el => { sectionRefs.current[total + 1] = el; }}
+              style={{ height: "100vh", scrollSnapAlign: "start", display: "grid", gridTemplateColumns: "1fr 1fr", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#f8f8f6" }}
+            >
+              {/* Subtle gradient accents */}
+              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 50% 70% at 0% 100%, ${rgba(brand, 0.06)} 0%, transparent 55%)`, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 40% 50% at 100% 0%, rgba(27,79,155,0.04) 0%, transparent 55%)", pointerEvents: "none" }} />
+
+              {/* LEFT — big typographic side */}
+              <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 48px 0 8vw", position: "relative", zIndex: 1, gap: "24px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ width: "24px", height: "1px", background: rgba(brand, 0.4) }} />
+                  <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: rgba(brand, 0.5) }}>End of Report</span>
+                </div>
+                <div>
+                  <h2 style={{ fontSize: "clamp(2.4rem,4vw,5rem)", fontWeight: 900, color: "#0a0a0a", lineHeight: 0.95, letterSpacing: "-0.04em", margin: 0 }}>Next<br /><span style={{ WebkitTextStroke: `1.5px ${rgba(brand, 0.35)}`, color: "transparent" }}>Steps.</span></h2>
+                </div>
+                <div style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.3)}, transparent)`, maxWidth: "320px" }} />
+                <p style={{ fontSize: "0.88rem", color: "rgba(0,0,0,0.38)", lineHeight: 1.8, maxWidth: "360px", margin: 0 }}>
+                  The full SSEB report includes the complete maturity framework, retailer benchmarking, and a prioritized roadmap built for your scale.
+                </p>
+                <button onClick={() => scrollTo(0)} style={{ alignSelf: "flex-start", padding: "0", background: "none", border: "none", color: "rgba(0,0,0,0.2)", cursor: "pointer", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>↑ Back to top</button>
+              </div>
+
+              {/* RIGHT — action card */}
+              <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw 0 48px", position: "relative", zIndex: 1, gap: "16px" }}>
+                {/* Card */}
+                <div style={{ borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(0,0,0,0.07)", background: "#fff", boxShadow: "0 8px 40px rgba(0,0,0,0.06)" }}>
+                  {/* Gradient bar top */}
+                  <div style={{ height: "3px", background: "linear-gradient(90deg, #1B4F9B, #4B1D6E, #9B1B2A)" }} />
+                  <div style={{ padding: "36px 36px 32px" }}>
+                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(0,0,0,0.3)", marginBottom: "20px" }}>What happens next</div>
+                    {[
+                      { n: "01", title: "Access the Full Report", desc: "Get the complete benchmark data, maturity framework, and retailer comparisons." },
+                      { n: "02", title: "30-Min Walkthrough", desc: "A Diebold Nixdorf consultant walks you through findings relevant to your operations." },
+                    ].map((step) => (
+                      <div key={step.n} style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
+                        <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <span style={{ fontSize: "9px", fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>{step.n}</span>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#111", marginBottom: "4px" }}>{step.title}</div>
+                          <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.4)", lineHeight: 1.6 }}>{step.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ height: "1px", background: "rgba(0,0,0,0.06)", marginBottom: "24px" }} />
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E, #9B1B2A)", border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(27,79,155,0.25)" }}>
+                        Access Full Report
+                      </button>
+                      <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "transparent", border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.5)", cursor: "pointer", fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em" }}>
+                        Schedule a Call with a Consultant
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
+                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.25 }} />
+                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.2)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
+                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.15)" }}>© 2025 Incisiv</span>
+              </div>
+            </section>
+          </>
+        )}
+
         {isT2 && (
           <>
             {/* ══ T2 · HERO ═══════════════════════════════════════════════════════
@@ -388,7 +637,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div className="reveal" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "5px 14px 5px 10px", borderRadius: "20px", background: rgba(brand, .1), border: `1px solid ${rgba(brand, .32)}`, marginBottom: "24px", alignSelf: "flex-start" }}>
                   <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: brand, animation: "blink 2s ease-in-out infinite" }} />
                   <span style={{ fontFamily: "var(--font-heading),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".15em", textTransform: "uppercase", color: brandLight }}>
-                    Incisiv × Diebold Nixdorf &nbsp;·&nbsp; SSEB 2025
+                    Diebold Nixdorf &nbsp;·&nbsp; SSEB 2025
                   </span>
                 </div>
 
@@ -497,21 +746,19 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* LEFT — big stat + hook */}
                 <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", paddingRight:"48px", borderRight:`1px solid rgba(124,58,237,.15)` }}>
-                  <p className="t2-section-label reveal" style={{ marginBottom:"20px" }}>Finding {p.number} <span style={{ opacity:.4, fontWeight:400 }}>/ {total}</span></p>
+                  <p className="t2-section-label reveal" style={{ marginBottom:"20px" }}>{p.title}</p>
                   {/* Giant stat */}
                   <div className="reveal reveal-d1" style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(4rem,8vw,9rem)", fontWeight:800, lineHeight:.85, color:brandLight, "--sb-color":rgba(brand,.5), animation:"statBreathe 2.5s ease-in-out infinite", marginBottom:"12px" } as React.CSSProperties}>
                     {p.stat}
                   </div>
                   <p className="reveal reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"14px", color:"rgba(220,215,255,.5)", lineHeight:1.5, maxWidth:"220px", marginBottom:"28px" }}>{p.statLabel}</p>
                   <div className="reveal reveal-d2" style={{ height:"1px", background:`linear-gradient(90deg,${rgba(brand,.5)},transparent)`, marginBottom:"22px", width:"80%" }} />
-                  <blockquote className="reveal reveal-d2" style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(1.25rem,1.6vw,1.5rem)", fontStyle:"italic", color:"rgba(240,238,255,.82)", lineHeight:1.55, margin:0 }}>
-                    &ldquo;{p.hook}&rdquo;
-                  </blockquote>
+
                 </div>
 
                 {/* RIGHT — title + body + bullets */}
                 <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", paddingLeft:"48px", gap:"20px" }}>
-                  <h2 className="t2-section-heading reveal reveal-right" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)" }}>{p.title}</h2>
+                  <h2 className="t2-section-heading reveal reveal-right" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)" }}>{p.hook}</h2>
                   <p className="reveal reveal-right reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"clamp(.8rem,.9vw,.88rem)", color:"rgba(220,215,255,.5)", lineHeight:1.85 }}>{p.body}</p>
                   <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
                     {p.bullets.map((b, bi) => (
@@ -524,6 +771,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     ))}
                   </div>
                   <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                  <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
+                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             </section>
@@ -539,16 +795,10 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <div style={{ position:"absolute", bottom:"10%", left:"5%", width:"350px", height:"350px", background:`radial-gradient(ellipse,${rgba(brand,.1)} 0%,transparent 60%)`, pointerEvents:"none" }} />
 
               <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", gap:"20px", height:"100%", justifyContent:"center" }}>
-                <p className="t2-section-label reveal">Finding {p.number} <span style={{ opacity:.4, fontWeight:400 }}>/ {total}</span></p>
-                <h2 className="t2-section-heading reveal reveal-d1" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", maxWidth:"680px" }}>{p.title}</h2>
+                <p className="t2-section-label reveal">{p.title}</p>
+                <h2 className="t2-section-heading reveal reveal-d1" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", maxWidth:"680px" }}>{p.hook}</h2>
 
-                {/* Full-width hook — like Shoptalk's make-most interlude */}
-                <div className="reveal reveal-d2" style={{ padding:"24px 32px", borderRadius:"16px", background:`linear-gradient(135deg,${rgba(brand,.08)},rgba(124,58,237,.06))`, border:`1px solid ${rgba(brand,.2)}`, position:"relative", overflow:"hidden" }}>
-                  <div style={{ position:"absolute", left:0, top:0, bottom:0, width:"3px", background:`linear-gradient(to bottom,${brand},#7c3aed)` }} />
-                  <blockquote style={{ fontFamily:"var(--font-display),sans-serif", fontSize:"clamp(1.1rem,1.6vw,1.55rem)", fontWeight:700, color:"#f0eeff", lineHeight:1.1, textTransform:"uppercase", letterSpacing:".01em", margin:0 }}>
-                    {p.hook}
-                  </blockquote>
-                </div>
+
 
                 {/* 3-col bento: stat | body | bullets */}
                 <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"180px 1fr 1fr", gap:"14px", flex:1, maxHeight:"220px" }}>
@@ -574,6 +824,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   </div>
                 </div>
                 <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
+                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                      </a>
+                    ))}
+                  </div>
               </div>
             </section>
             ); })()}
@@ -595,21 +854,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     <span style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(3rem,6vw,6.5rem)", fontWeight:800, lineHeight:.9, color:brandLight, "--sb-color":rgba(brand,.5), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</span>
                     <span style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.4)", maxWidth:"180px", lineHeight:1.4 }}>{p.statLabel}</span>
                   </div>
-                  <p className="t2-section-label" style={{ margin:0, textAlign:"right" }}>Finding {p.number} <span style={{ opacity:.4, fontWeight:400 }}>/ {total}</span></p>
+                  <p className="t2-section-label" style={{ margin:0, textAlign:"right" }}>{p.title}</p>
                 </div>
 
                 {/* ── Row 2: title + body side by side ── */}
                 <div className="reveal reveal-d1" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"40px", marginBottom:"24px" }}>
-                  <h2 className="t2-section-heading" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", margin:0 }}>{p.title}</h2>
+                  <h2 className="t2-section-heading" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", margin:0 }}>{p.hook}</h2>
                   <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.48)", lineHeight:1.85, margin:0, alignSelf:"center" }}>{p.body}</p>
                 </div>
 
                 {/* ── Row 3: pull-quote between rules ── */}
-                <div className="reveal reveal-d2" style={{ borderTop:`1px solid rgba(124,58,237,.18)`, borderBottom:`1px solid rgba(124,58,237,.18)`, padding:"20px 0", marginBottom:"24px", textAlign:"center" }}>
-                  <blockquote style={{ fontFamily:"var(--font-display),sans-serif", fontSize:"clamp(1.2rem,1.9vw,1.8rem)", fontWeight:700, color:"rgba(240,238,255,.75)", lineHeight:1.2, fontStyle:"italic", letterSpacing:"-.01em", margin:0 }}>
-                    &ldquo;{p.hook}&rdquo;
-                  </blockquote>
-                </div>
+
 
                 {/* ── Row 4: 3 bullets as bare horizontal list ── */}
                 <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0" }}>
@@ -622,6 +877,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.15)", fontStyle:"italic", marginTop:"16px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
+                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                      </a>
+                    ))}
+                  </div>
               </div>
             </section>
             ); })()}
@@ -639,12 +903,10 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* Left — editorial text column */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
-                  <p className="t2-section-label reveal">Finding {p.number} <span style={{ opacity:.4, fontWeight:400 }}>/ {total}</span></p>
-                  <h2 className="t2-section-heading reveal reveal-d1" style={{ fontSize:"clamp(2rem,2.8vw,3rem)" }}>{p.title}</h2>
+                  <p className="t2-section-label reveal">{p.title}</p>
+                  <h2 className="t2-section-heading reveal reveal-d1" style={{ fontSize:"clamp(2rem,2.8vw,3rem)" }}>{p.hook}</h2>
                   <div className="reveal reveal-d2" style={{ height:"1px", background:`linear-gradient(90deg,${rgba(brand,.5)},transparent)` }} />
-                  <blockquote className="reveal reveal-d2" style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(1.15rem,1.4vw,1.35rem)", fontStyle:"italic", color:"rgba(240,238,255,.78)", lineHeight:1.6, margin:0, paddingLeft:"14px", borderLeft:`2px solid ${rgba(brand,.5)}` }}>
-                    &ldquo;{p.hook}&rdquo;
-                  </blockquote>
+
                   <p className="reveal reveal-d3" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.45)", lineHeight:1.85 }}>{p.body}</p>
                 </div>
 
@@ -668,6 +930,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     </div>
                   ))}
                   <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                  <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
+                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             </section>
@@ -686,8 +957,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", width:"80vw", height:"50vh", background:`radial-gradient(ellipse,${rgba(brand,.15)} 0%,transparent 55%)`, zIndex:1, pointerEvents:"none" }} />
 
               <div style={{ position:"relative", zIndex:2, display:"flex", flexDirection:"column", gap:"20px" }}>
-                <p className="t2-section-label reveal" style={{ marginBottom:"4px" }}>Finding {p.number} <span style={{ opacity:.4, fontWeight:400 }}>/ {total}</span></p>
-                <h2 className="t2-section-heading reveal reveal-d1" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", maxWidth:"620px" }}>{p.title}</h2>
+                <p className="t2-section-label reveal" style={{ marginBottom:"4px" }}>{p.title}</p>
+                <h2 className="t2-section-heading reveal reveal-d1" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", maxWidth:"620px" }}>{p.hook}</h2>
 
                 {/* Giant centered stat — chapter-break energy */}
                 <div className="reveal reveal-d2" style={{ display:"flex", alignItems:"baseline", gap:"16px", padding:"20px 0 16px" }}>
@@ -702,9 +973,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* Hook */}
                 <div className="reveal reveal-d2" style={{ height:"1px", background:`linear-gradient(90deg,${rgba(brand,.6)},rgba(124,58,237,.3),transparent)`, marginBottom:"4px" }} />
-                <blockquote className="reveal reveal-d3" style={{ fontFamily:"var(--font-display),sans-serif", fontSize:"clamp(1.1rem,1.5vw,1.4rem)", fontWeight:700, color:"rgba(240,238,255,.88)", lineHeight:1.1, textTransform:"uppercase", letterSpacing:".01em", margin:0, maxWidth:"720px" }}>
-                  {p.hook}
-                </blockquote>
+
 
                 {/* 2-col: body + bullets */}
                 <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"24px", paddingTop:"4px" }}>
@@ -719,6 +988,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       </div>
                     ))}
                     <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                    <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
+                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                      </a>
+                    ))}
+                  </div>
                   </div>
                 </div>
               </div>
@@ -739,7 +1017,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* Left — vertical step list */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"0" }}>
-                  <p className="t2-section-label reveal" style={{ marginBottom:"20px" }}>Finding {p.number} <span style={{ opacity:.4, fontWeight:400 }}>/ {total}</span></p>
+                  <p className="t2-section-label reveal" style={{ marginBottom:"20px" }}>{p.title}</p>
                   {p.bullets.map((b, bi) => (
                     <div key={bi} className={`reveal reveal-d${bi+1 as 1|2|3}`} style={{ display:"flex", gap:"16px", paddingBottom: bi < p.bullets.length-1 ? "20px" : "0", position:"relative" }}>
                       {/* Vertical line connector */}
@@ -762,15 +1040,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* Right — title + hook + stat */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"20px" }}>
-                  <h2 className="t2-section-heading reveal reveal-right" style={{ fontSize:"clamp(2rem,2.8vw,3rem)" }}>{p.title}</h2>
+                  <h2 className="t2-section-heading reveal reveal-right" style={{ fontSize:"clamp(2rem,2.8vw,3rem)" }}>{p.hook}</h2>
 
-                  {/* Hook in a bordered card */}
-                  <div className="reveal reveal-right reveal-d1 t2-bento" style={{ padding:"28px 32px", position:"relative", overflow:"hidden" }}>
-                    <div style={{ position:"absolute", top:0, left:0, right:0, height:"2px", background:`linear-gradient(90deg,${brand},#7c3aed,transparent)`, animation:"borderPulse 3s ease-in-out infinite" }} />
-                    <blockquote style={{ fontFamily:"var(--font-display),sans-serif", fontSize:"clamp(1.1rem,1.6vw,1.5rem)", fontWeight:700, color:"#f0eeff", lineHeight:1.1, textTransform:"uppercase", letterSpacing:".01em", margin:0 }}>
-                      {p.hook}
-                    </blockquote>
-                  </div>
+
 
                   {/* Body */}
                   <p className="reveal reveal-right reveal-d2" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.45)", lineHeight:1.85 }}>{p.body}</p>
@@ -783,6 +1055,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     </div>
                     <div style={{ flex:1, height:"1px", background:`linear-gradient(90deg,${rgba(brand,.3)},transparent)` }} />
                     <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives</p>
+                    <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
+                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                      </a>
+                    ))}
+                  </div>
                   </div>
                 </div>
               </div>
@@ -806,36 +1087,60 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 65% 55% at 50% 50%,rgba(109,40,217,.13) 0%,transparent 65%)", pointerEvents: "none" }} />
               <div style={{ position: "absolute", bottom: "5%", right: "5%", width: "480px", height: "380px", background: `radial-gradient(ellipse,${rgba(brand,.09)} 0%,transparent 60%)`, pointerEvents: "none" }} />
 
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <p className="t2-section-label reveal" style={{ marginBottom: "20px" }}>End of Report</p>
+              {/* Two-col layout */}
+              <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "48px", alignItems: "center", width: "100%" }}>
 
-                <h2 className="reveal reveal-d1" style={{
-                  fontFamily: "var(--font-display),sans-serif",
-                  fontSize: "clamp(2.2rem,4.5vw,4.6rem)",
-                  fontWeight: 700, color: "#f0eeff",
-                  lineHeight: .95, letterSpacing: ".01em", textTransform: "uppercase",
-                  marginBottom: "22px", maxWidth: "680px",
-                }}>
-                  Take the Next Step with <span style={{ color: brandLight }}>{grocer.shortName}</span>
-                </h2>
+                {/* LEFT */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  <p className="t2-section-label reveal" style={{ marginBottom: "0" }}>End of Report</p>
+                  <div className="reveal reveal-d1">
+                    <h2 style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(2.4rem,4vw,5rem)", fontWeight: 700, color: "#f0eeff", lineHeight: 0.95, letterSpacing: "-0.01em", textTransform: "uppercase", margin: 0 }}>
+                      Next<br /><span style={{ WebkitTextStroke: "1.5px rgba(240,238,255,0.2)", color: "transparent" }}>Steps.</span>
+                    </h2>
+                  </div>
+                  <div style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand,.5)}, rgba(109,40,217,.25), transparent)`, maxWidth: "320px" }} />
+                  <p className="reveal reveal-d2" style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: ".88rem", color: "rgba(220,215,255,.28)", lineHeight: 1.82, maxWidth: "380px", margin: 0 }}>
+                    The full SSEB report includes the complete maturity framework, retailer benchmarking, and a prioritized roadmap built for your scale.
+                  </p>
+                  <button onClick={() => scrollTo(0)} style={{ alignSelf: "flex-start", padding: "0", background: "none", border: "none", color: "rgba(220,215,255,.15)", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", letterSpacing: ".1em", textTransform: "uppercase" }}>↑ Back to top</button>
+                </div>
 
-                <div style={{ height: "1px", background: `linear-gradient(90deg,${rgba(brand,.5)},rgba(109,40,217,.25),transparent)`, marginBottom: "22px", maxWidth: "560px" }} />
-
-                <p className="reveal reveal-d2" style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: ".95rem", color: "rgba(220,215,255,.3)", lineHeight: 1.82, maxWidth: "500px", marginBottom: "38px" }}>
-                  The full SSEB report includes the complete maturity framework, retailer benchmarking, and a prioritized roadmap built for your scale.
-                </p>
-
-                <div className="reveal reveal-d3" style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-                  <button className="t2-btn-primary">Access Full Report</button>
-                  <button className="t2-btn-ghost">Connect With Us</button>
-                  <button onClick={() => scrollTo(0)} style={{ padding: "13px 18px", background: "none", border: "none", color: "rgba(220,215,255,.2)", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", letterSpacing: ".06em" }}>
-                    ↑ Back to top
-                  </button>
+                {/* RIGHT — action card */}
+                <div className="reveal reveal-right reveal-d1">
+                  <div style={{ borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(109,40,217,0.25)", background: "#13102a", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
+                    <div style={{ height: "3px", background: "linear-gradient(90deg, #1B4F9B, #4B1D6E, #9B1B2A)" }} />
+                    <div style={{ padding: "36px 36px 32px" }}>
+                      <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(220,215,255,0.22)", marginBottom: "20px" }}>What happens next</div>
+                      {[
+                        { n: "01", title: "Access the Full Report", desc: "Get the complete benchmark data, maturity framework, and retailer comparisons." },
+                        { n: "02", title: "30-Min Walkthrough", desc: "A Diebold Nixdorf consultant walks you through findings relevant to your operations." },
+                      ].map((step) => (
+                        <div key={step.n} style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
+                          <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>{step.n}</span>
+                          </div>
+                          <div>
+                            <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "12px", fontWeight: 700, color: "rgba(240,238,255,0.75)", marginBottom: "4px" }}>{step.title}</div>
+                            <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,0.3)", lineHeight: 1.6 }}>{step.desc}</div>
+                          </div>
+                        </div>
+                      ))}
+                      <div style={{ height: "1px", background: "rgba(109,40,217,0.2)", marginBottom: "24px" }} />
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E, #9B1B2A)", border: "none", color: "#fff", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(27,79,155,0.35)" }}>
+                          Access Full Report
+                        </button>
+                        <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "transparent", border: "1px solid rgba(109,40,217,0.3)", color: "rgba(220,215,255,0.45)", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em" }}>
+                          Schedule a Call with a Consultant
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px max(32px,calc(50vw - 620px))", borderTop: "1px solid rgba(109,40,217,.1)", display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 800, color: "rgba(220,215,255,.1)", letterSpacing: ".1em" }}>INCISIV × DIEBOLD NIXDORF</span>
+                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.35 }} />
                 <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.07)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
                 <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.05)" }}>© 2025 Incisiv</span>
               </div>
@@ -906,7 +1211,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           {/* Bottom rule */}
           <div style={{ height:"1px", background:"rgba(255,255,255,0.04)", position:"relative", zIndex:2 }} />
           <div style={{ padding:"12px 8vw", display:"flex", justifyContent:"space-between", position:"relative", zIndex:2 }}>
-            <span style={{ fontSize:"9px", color:"rgba(255,255,255,0.12)", letterSpacing:"0.1em", fontWeight:700 }}>INCISIV × DIEBOLD NIXDORF</span>
+            <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.35 }} />
             <span style={{ fontSize:"9px", color:"rgba(255,255,255,0.08)" }}>131 retail executives · 2,533 shoppers</span>
           </div>
 
@@ -924,13 +1229,21 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           const textCol = (
             <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"48px":"8vw"} 56px ${isA?"8vw":"48px"}`, borderRight:"none", borderLeft:"none", position:"relative", zIndex:1, gap:"20px" }}>
               <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
-                <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>Finding {p.number}</span>
+                <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>{p.title}</span>
                 <span style={{ color:"rgba(255,255,255,0.2)", fontSize:"11px" }}>/ {total}</span>
               </div>
-              <TypewriterTitle text={p.title} style={{ fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }} />
-              <p className="ru" style={{ animationDelay:"0.12s", fontSize:"clamp(1rem,1.4vw,1.3rem)", fontStyle:"italic", color:"rgba(255,255,255,0.68)", lineHeight:1.5, margin:0 }}>&ldquo;{p.hook}&rdquo;</p>
+              <WordFadeTitle text={p.hook} style={{ fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }} />
               <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
               <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.5)", lineHeight:1.9, margin:0 }}>{p.body}</p>
+              <div className="rfi" style={{ animationDelay:"0.2s", display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
+                {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
+                  <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(255,255,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.6), rgba(75,29,110,0.6), rgba(155,27,42,0.6))", display:"inline-block", transition:"all 0.2s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.9), rgba(75,29,110,0.9), rgba(155,27,42,0.9))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.6), rgba(75,29,110,0.6), rgba(155,27,42,0.6))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(255,255,255,0.5)"; }}>
+                    <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"rgba(8,12,18,0.95)" }}>{label}</span>
+                  </a>
+                ))}
+              </div>
             </div>
           );
 
@@ -938,18 +1251,44 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"8vw":"48px"} 56px ${isA?"48px":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
               {/* Stat + label inline */}
               <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"center", gap:"24px" }}>
-                <div style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite", flexShrink:0 } as React.CSSProperties}>{p.stat}</div>
+                {(() => {
+                  const vsMatch = p.stat.match(/^(\d+)%\s*vs\.?\s*(\d+)%$/i);
+                  if (vsMatch) {
+                    return (
+                      <div style={{ display:"flex", alignItems:"baseline", gap:"8px", flexShrink:0, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>
+                        <CountUpStat value={parseInt(vsMatch[1])} style={{ fontSize:"clamp(3rem,5vw,5.5rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight }} />
+                        <span style={{ fontSize:"clamp(0.85rem,1.1vw,1rem)", fontWeight:600, color:"rgba(255,255,255,0.3)", letterSpacing:"0.06em", textTransform:"uppercase" }}>vs.</span>
+                        <CountUpStat value={parseInt(vsMatch[2])} style={{ fontSize:"clamp(2rem,3.5vw,4rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:"rgba(255,255,255,0.35)" }} />
+                      </div>
+                    );
+                  }
+                  const pctMatch = p.stat.match(/^(\d+)%$/);
+                  if (pctMatch) {
+                    return <CountUpStat value={parseInt(pctMatch[1])} style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite", flexShrink:0 } as React.CSSProperties} />;
+                  }
+                  const generalMatch = p.stat.match(/^([\d.]+)(.*)$/);
+                  if (generalMatch && !isNaN(parseFloat(generalMatch[1]))) {
+                    const num = parseFloat(generalMatch[1]);
+                    const sfx = generalMatch[2] || "";
+                    if (Number.isInteger(num)) {
+                      return <CountUpStat value={num} suffix={sfx} style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite", flexShrink:0 } as React.CSSProperties} />;
+                    }
+                  }
+                  return <div style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite", flexShrink:0 } as React.CSSProperties}>{p.stat}</div>;
+                })()}
                 <p style={{ fontSize:"clamp(1rem,1.15vw,1.15rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.4, maxWidth:"160px", margin:0 }}>{p.statLabel}</p>
               </div>
               <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
-              {/* Bullets in a box */}
-              <div className="ru" style={{ animationDelay:"0.18s", display:"flex", flexDirection:"column", gap:"0", border:`1px solid ${rgba(brand,0.35)}`, borderRadius:"8px", overflow:"hidden", background:rgba(brand,0.05), animation:"bulletBoxGlow 2.5s ease-in-out infinite", "--bb-color":rgba(brand,0.4) } as React.CSSProperties}>
-                {p.bullets.map((b,bi) => (
-                  <div key={bi} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px" }}>
-                    <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight, flexShrink:0, marginTop:"7px" }} />
-                    <p style={{ fontSize:"clamp(0.9rem,1.05vw,1rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.6, margin:0 }}>{b}</p>
-                  </div>
-                ))}
+              {/* Bullets in a box — running border glow */}
+              <div className="ru bullet-box-wrap" style={{ animationDelay:"0.18s", "--bb-color":rgba(brand,0.9) } as React.CSSProperties}>
+                <div style={{ display:"flex", flexDirection:"column", gap:"0", borderRadius:"7px", overflow:"hidden", background:rgba(brand,0.05), position:"relative", zIndex:1 }}>
+                  {p.bullets.map((b,bi) => (
+                    <div key={bi} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px" }}>
+                      <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight, flexShrink:0, marginTop:"7px" }} />
+                      <p style={{ fontSize:"clamp(0.9rem,1.05vw,1rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.6, margin:0 }}>{b}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
               <p style={{ fontSize:"11px", color:"rgba(255,255,255,0.2)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
             </div>
@@ -965,68 +1304,62 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         {/* ══ END ═══════════════════════════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[total + 1] = el; }}
-          style={{
-            height: "100vh", scrollSnapAlign: "start",
-            display: "flex", flexDirection: "column", justifyContent: "center",
-            paddingTop: "44px", position: "relative", overflow: "hidden",
-          }}
+          style={{ height: "100vh", scrollSnapAlign: "start", display: "grid", gridTemplateColumns: "1fr 1fr", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#080c12" }}
         >
-          <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 60% 60% at 50% 50%, ${rgba(brand, 0.07)} 0%, transparent 70%)`, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 50% 70% at 0% 100%, ${rgba(brand, 0.1)} 0%, transparent 55%)`, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 40% 50% at 100% 0%, rgba(27,79,155,0.08) 0%, transparent 55%)", pointerEvents: "none" }} />
 
-          <div className="ru" style={{ position: "relative", maxWidth: "960px", margin: "0 auto", padding: "0 56px", width: "100%" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "28px" }}>
-              <div style={{ width: "16px", height: "1px", background: rgba(brand, 0.6) }} />
-              <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: rgba(brand, 0.6) }}>End of Report</span>
+          {/* LEFT */}
+          <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 48px 0 8vw", position: "relative", zIndex: 1, gap: "24px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ width: "24px", height: "1px", background: rgba(brand, 0.5) }} />
+              <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: rgba(brand, 0.6) }}>End of Report</span>
             </div>
-
-            <h2 style={{
-              fontSize: "clamp(1.6rem, 2.4vw, 2.8rem)",
-              fontWeight: 900, color: "#fff",
-              lineHeight: 1.04, letterSpacing: "-0.04em",
-              marginBottom: "20px", maxWidth: "640px",
-            }}>
-              Take the Next Step with {grocer.shortName}
-            </h2>
-
-            <div style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.5)}, transparent)`, marginBottom: "28px" }} />
-
-            <p style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.75, maxWidth: "480px", marginBottom: "36px" }}>
+            <div>
+              <h2 style={{ fontSize: "clamp(2.4rem,4vw,5rem)", fontWeight: 900, color: "#fff", lineHeight: 0.95, letterSpacing: "-0.04em", margin: 0 }}>Next<br /><span style={{ WebkitTextStroke: "1.5px rgba(255,255,255,0.2)", color: "transparent" }}>Steps.</span></h2>
+            </div>
+            <div style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.4)}, transparent)`, maxWidth: "320px" }} />
+            <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.28)", lineHeight: 1.8, maxWidth: "360px", margin: 0 }}>
               The full SSEB report includes the complete maturity framework, retailer benchmarking, and a prioritized roadmap built for your scale.
             </p>
+            <button onClick={() => scrollTo(0)} style={{ alignSelf: "flex-start", padding: "0", background: "none", border: "none", color: "rgba(255,255,255,0.15)", cursor: "pointer", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>↑ Back to top</button>
+          </div>
 
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button style={{
-                padding: "13px 28px", borderRadius: "4px",
-                background: brand, color: "#fff", border: "none", cursor: "pointer",
-                fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-                boxShadow: `0 4px 24px ${rgba(brand, 0.3)}`,
-              }}>
-                Access Full Report
-              </button>
-              <button style={{
-                padding: "13px 28px", borderRadius: "4px",
-                background: "transparent", border: "1px solid rgba(255,255,255,0.12)",
-                color: "rgba(255,255,255,0.5)", cursor: "pointer",
-                fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-              }}>
-                Connect With Us
-              </button>
-              <button onClick={() => scrollTo(0)} style={{
-                padding: "13px 20px", background: "none", border: "none",
-                color: "rgba(255,255,255,0.18)", cursor: "pointer",
-                fontSize: "11px", letterSpacing: "0.08em",
-              }}>
-                ↑ Back to top
-              </button>
+          {/* RIGHT — action card */}
+          <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw 0 48px", position: "relative", zIndex: 1 }}>
+            <div style={{ borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)" }}>
+              <div style={{ height: "3px", background: "linear-gradient(90deg, #1B4F9B, #4B1D6E, #9B1B2A)" }} />
+              <div style={{ padding: "36px 36px 32px" }}>
+                <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "20px" }}>What happens next</div>
+                {[
+                  { n: "01", title: "Access the Full Report", desc: "Get the complete benchmark data, maturity framework, and retailer comparisons." },
+                  { n: "02", title: "30-Min Walkthrough", desc: "A Diebold Nixdorf consultant walks you through findings relevant to your operations." },
+                ].map((step) => (
+                  <div key={step.n} style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
+                    <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: "9px", fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>{step.n}</span>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.75)", marginBottom: "4px" }}>{step.title}</div>
+                      <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.28)", lineHeight: 1.6 }}>{step.desc}</div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "24px" }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E, #9B1B2A)", border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(27,79,155,0.3)" }}>
+                    Access Full Report
+                  </button>
+                  <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)", cursor: "pointer", fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em" }}>
+                    Schedule a Call with a Consultant
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 56px", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-              <span style={{ fontSize: "9px", fontWeight: 800, color: "rgba(255,255,255,0.12)", letterSpacing: "0.1em" }}>INCISIV</span>
-              <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.06)" }}>×</span>
-              <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.08)" }}>DIEBOLD NIXDORF</span>
-            </div>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
+            <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.35 }} />
             <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.08)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
             <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.06)" }}>© 2025 Incisiv</span>
           </div>
