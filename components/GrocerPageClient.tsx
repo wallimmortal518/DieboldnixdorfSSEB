@@ -526,7 +526,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                       { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                     ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(0,0,0,0.6)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(0,0,0,0.15)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(0,0,0,0.6)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(0,0,0,0.15)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(0,0,0,0.05)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(0,0,0,0.3)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(0,0,0,0.15)"; }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -607,7 +607,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div style={{ marginBottom: "36px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
                     <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
-                    <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>SSEB 2025 · Closing Thoughts</span>
+                    <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>Next Steps</span>
                   </div>
                   <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#0a0a0a", margin: 0, maxWidth: "720px" }}>
                     The gap between{" "}
@@ -640,21 +640,21 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
 
                   {/* Card A — Full Report */}
-                  <div style={{ borderRadius: "16px", overflow: "hidden", background: "linear-gradient(135deg,#1B4F9B,#4B1D6E 55%,#9B1B2A)", boxShadow: `0 8px 40px rgba(27,79,155,.2), 0 0 0 1px rgba(255,255,255,.1)`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative" }}>
-                    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,255,255,.08) 0%,transparent 60%)", pointerEvents: "none" }} />
+                  <div style={{ borderRadius: "16px", background: "#fff", border: `1px solid ${rgba(brand,.18)}`, boxShadow: `0 4px 24px ${rgba(brand,.08)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: "-20%", left: "-10%", width: "65%", height: "65%", background: `radial-gradient(ellipse,${rgba(brand,.07)} 0%,transparent 60%)`, pointerEvents: "none" }} />
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
-                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.9)" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.08), border: `1px solid ${rgba(brand,.2)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brand} strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", marginBottom: "6px" }}>Full Report</div>
-                        <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
-                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,.55)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: rgba(brand,.5), marginBottom: "6px" }}>Full Report</div>
+                        <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#0a0a0a", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
+                        <div style={{ fontSize: "11px", color: "rgba(0,0,0,.45)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
                       </div>
                       <div style={{ flex: 1 }} />
-                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)", color: "#fff", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.25)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.15)"; }}>
+                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px", boxShadow: `0 4px 16px ${rgba(brand,.25)}` }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.88"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}>
                         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         Download Report →
                       </button>
@@ -662,14 +662,14 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   </div>
 
                   {/* Card B — Schedule Call */}
-                  <div style={{ borderRadius: "16px", background: "#fff", border: `1px solid ${rgba(brand,.15)}`, boxShadow: "0 4px 24px rgba(0,0,0,.06)", padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
-                    <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "60%", height: "60%", background: `radial-gradient(ellipse,${rgba(brand,.06)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+                  <div style={{ borderRadius: "16px", background: "#fff", border: `1px solid ${rgba(brand,.18)}`, boxShadow: `0 4px 24px ${rgba(brand,.08)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "65%", height: "65%", background: `radial-gradient(ellipse,${rgba(brand,.07)} 0%,transparent 60%)`, pointerEvents: "none" }} />
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
                       <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.08), border: `1px solid ${rgba(brand,.2)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brand} strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(0,0,0,.3)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: rgba(brand,.5), marginBottom: "6px" }}>Expert Walkthrough</div>
                         <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#0a0a0a", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>30-Min Strategy Call</div>
                         <div style={{ fontSize: "11px", color: "rgba(0,0,0,.45)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
                       </div>
@@ -884,7 +884,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                       { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                     ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -941,7 +941,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                       { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                     ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -998,7 +998,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                       { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                     ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -1055,7 +1055,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                       { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                     ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -1117,7 +1117,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                       { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                     ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -1188,7 +1188,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                       { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                     ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -1230,7 +1230,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div className="reveal" style={{ marginBottom: "36px" }}>
                   <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
                     <div style={{ width: "20px", height: "1px", background: rgba(brand,.6) }} />
-                    <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>SSEB 2025 · Closing Thoughts</span>
+                    <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>Next Steps</span>
                   </div>
                   <h2 style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 700, lineHeight: 1.0, letterSpacing: "-.01em", textTransform: "uppercase", color: "#f0eeff", margin: 0, maxWidth: "720px" }}>
                     The gap between{" "}
@@ -1262,47 +1262,43 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {/* ── ZONE 3: Two invitation cards ── */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
 
-                  {/* Card A — Full Report (primary, gradient fill) */}
-                  <div className="reveal reveal-d2" style={{ borderRadius: "16px", overflow: "hidden", background: "linear-gradient(135deg,#1B4F9B,#4B1D6E 55%,#9B1B2A)", boxShadow: `0 8px 40px rgba(27,79,155,.35), 0 0 0 1px rgba(255,255,255,.06)`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative" }}>
-                    {/* Noise/gloss overlay */}
-                    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,255,255,.07) 0%,transparent 60%)", pointerEvents: "none" }} />
+                  {/* Card A — Full Report */}
+                  <div className="reveal reveal-d2" style={{ borderRadius: "16px", background: "#13102a", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.12)}`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: "-20%", left: "-10%", width: "65%", height: "65%", background: `radial-gradient(ellipse,${rgba(brand,.14)} 0%,transparent 60%)`, pointerEvents: "none" }} />
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
-                      {/* Icon */}
-                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,.12)", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)" }}>
-                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.9)" strokeWidth={1.8}>
+                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.12), border: `1px solid ${rgba(brand,.28)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brandLight} strokeWidth={1.8}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                       </div>
                       <div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", marginBottom: "6px" }}>Full Report</div>
-                        <div style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700, color: "#fff", lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-.01em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(255,255,255,.55)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.35)", marginBottom: "6px" }}>Full Report</div>
+                        <div style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700, color: "#f0eeff", lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-.01em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.42)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
                       </div>
                       <div style={{ flex: 1 }} />
-                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)", color: "#fff", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", backdropFilter: "blur(8px)", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.25)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.15)"; }}>
+                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: brandLight, border: "none", color: "#0a0012", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "opacity .2s", display: "flex", alignItems: "center", gap: "7px", boxShadow: `0 4px 20px ${rgba(brand,.35)}` }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}>
                         <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         Download Report →
                       </button>
                     </div>
                   </div>
 
-                  {/* Card B — Schedule Call (secondary, dark glass) */}
-                  <div className="reveal reveal-d2" style={{ borderRadius: "16px", background: "#13102a", border: `1px solid ${rgba(brand,.22)}`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
-                    {/* Subtle inner glow */}
-                    <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "60%", height: "60%", background: `radial-gradient(ellipse,${rgba(brand,.12)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+                  {/* Card B — Schedule Call */}
+                  <div className="reveal reveal-d2" style={{ borderRadius: "16px", background: "#13102a", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.12)}`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "65%", height: "65%", background: `radial-gradient(ellipse,${rgba(brand,.14)} 0%,transparent 60%)`, pointerEvents: "none" }} />
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
-                      {/* Icon */}
                       <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.12), border: `1px solid ${rgba(brand,.28)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brandLight} strokeWidth={1.8}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                       </div>
                       <div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.28)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.35)", marginBottom: "6px" }}>Expert Walkthrough</div>
                         <div style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700, color: "#f0eeff", lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-.01em", marginBottom: "8px" }}>30-Min Strategy Call</div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.38)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.42)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
                       </div>
                       <div style={{ flex: 1 }} />
                       <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.38)}`, color: brandLight, cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
@@ -1435,7 +1431,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
                   { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
                 ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                  <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(255,255,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(255,255,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                  <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(255,255,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(255,255,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
                     onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(255,255,255,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(255,255,255,0.38)"; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(255,255,255,0.2)"; }}>
                     <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
@@ -1516,7 +1512,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <div style={{ marginBottom: "36px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
                 <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
-                <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>SSEB 2025 · Closing Thoughts</span>
+                <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>Next Steps</span>
               </div>
               <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#fff", margin: 0, maxWidth: "720px" }}>
                 The gap between{" "}
@@ -1548,33 +1544,33 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             {/* ── ZONE 3: Two invitation cards ── */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
 
-              {/* Card A — Full Report (gradient fill) */}
-              <div style={{ borderRadius: "16px", overflow: "hidden", background: "linear-gradient(135deg,#1B4F9B,#4B1D6E 55%,#9B1B2A)", boxShadow: "0 8px 40px rgba(27,79,155,.3), 0 0 0 1px rgba(255,255,255,.05)", padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative" }}>
-                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,255,255,.07) 0%,transparent 60%)", pointerEvents: "none" }} />
+              {/* Card A — Full Report */}
+              <div style={{ borderRadius: "16px", background: "rgba(255,255,255,.04)", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.1)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: "-20%", left: "-10%", width: "65%", height: "65%", background: `radial-gradient(ellipse,${rgba(brand,.12)} 0%,transparent 60%)`, pointerEvents: "none" }} />
                 <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
-                  <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.9)" strokeWidth={1.8}>
+                  <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.1), border: `1px solid ${rgba(brand,.25)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brandLight} strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", marginBottom: "6px" }}>Full Report</div>
+                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.32)", marginBottom: "6px" }}>Full Report</div>
                     <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.5)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.42)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
                   </div>
                   <div style={{ flex: 1 }} />
-                  <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)", color: "#fff", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.25)"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.15)"; }}>
+                  <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: brandLight, border: "none", color: "#0a0012", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "opacity .2s", display: "flex", alignItems: "center", gap: "7px", boxShadow: `0 4px 20px ${rgba(brand,.35)}` }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}>
                     <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     Download Report →
                   </button>
                 </div>
               </div>
 
-              {/* Card B — Schedule Call (dark glass) */}
-              <div style={{ borderRadius: "16px", background: "rgba(255,255,255,.025)", border: `1px solid ${rgba(brand,.2)}`, backdropFilter: "blur(20px)", padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "60%", height: "60%", background: `radial-gradient(ellipse,${rgba(brand,.1)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+              {/* Card B — Schedule Call */}
+              <div style={{ borderRadius: "16px", background: "rgba(255,255,255,.04)", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.1)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "65%", height: "65%", background: `radial-gradient(ellipse,${rgba(brand,.12)} 0%,transparent 60%)`, pointerEvents: "none" }} />
                 <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
                   <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.1), border: `1px solid ${rgba(brand,.25)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brandLight} strokeWidth={1.8}>
@@ -1582,14 +1578,14 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.22)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.32)", marginBottom: "6px" }}>Expert Walkthrough</div>
                     <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>30-Min Strategy Call</div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.3)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.42)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
                   </div>
                   <div style={{ flex: 1 }} />
-                  <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.35)}`, color: brandLight, cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                  <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.38)}`, color: brandLight, cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
                     onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = rgba(brand,.1); (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.55); }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.35); }}>
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.38); }}>
                     <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                     Schedule a Call →
                   </button>
