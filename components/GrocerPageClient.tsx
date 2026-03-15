@@ -345,89 +345,169 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-        display: "flex", flexDirection: "column",
-        background: isLight ? "rgba(250,250,248,1)" : "rgba(8,8,16,1)",
-        backdropFilter: "blur(24px)",
-        borderBottom: isLight ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.1)",
-        boxShadow: isLight ? "0 4px 24px rgba(0,0,0,0.08)" : `0 4px 32px rgba(0,0,0,0.7), 0 1px 0 ${rgba(brand,0.3)}`,
+
+      {/* Top-left: brand identity */}
+      <div style={{
+        position: "fixed", top: "20px", left: "28px", zIndex: 50,
+        display: "flex", alignItems: "center", gap: "10px",
+        pointerEvents: "none",
       }}>
+        <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: brand, boxShadow: `0 0 10px ${rgba(brand, 0.9)}` }} />
+        <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.4)" }}>
+          SSEB · 2025
+        </span>
+      </div>
 
-        {/* ROW 1 — Top bar */}
-        <div style={{ height: "48px", padding: "0 40px", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
-          {/* Left — report label */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: brand, boxShadow: `0 0 10px ${rgba(brand, 0.9)}` }} />
-            <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.55)" }}>
-              Self-Service Excellence Benchmark · 2025
-            </span>
-          </div>
+      {/* Top-center: floating pill nav */}
+      <nav style={{
+        position: "fixed", top: "14px", left: "50%", transform: "translateX(-50%)",
+        zIndex: 50,
+        display: "flex", alignItems: "center", gap: "2px",
+        padding: "6px 8px",
+        borderRadius: "100px",
+        background: isLightNav ? "rgba(255,255,255,0.82)" : "rgba(10,10,20,0.78)",
+        backdropFilter: "blur(28px)",
+        WebkitBackdropFilter: "blur(28px)",
+        border: isLightNav ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
+        boxShadow: isLightNav
+          ? "0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)"
+          : `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px ${rgba(brand,0.15)}, inset 0 1px 0 rgba(255,255,255,0.06)`,
+      }}>
+        {/* Hero dot */}
+        <button
+          onClick={() => scrollTo(0)}
+          title="Overview"
+          style={{
+            width: "34px", height: "34px", borderRadius: "50%",
+            border: "none", cursor: "pointer", position: "relative",
+            background: activeIdx === 0 ? (isLightNav ? rgba(brand, 0.1) : rgba(brand, 0.18)) : "transparent",
+            transition: "background 0.25s",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}
+          onMouseEnter={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
+          onMouseLeave={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+        >
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={activeIdx === 0 ? brand : isLightNav ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)"} strokeWidth={2.2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </button>
 
-          <div />
+        {/* Separator */}
+        <div style={{ width: "1px", height: "16px", background: isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", flexShrink: 0 }} />
 
-          {/* Right — utilities */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "flex-end" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-              <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.6)", whiteSpace: "nowrap" }}>Powered by</span>
-              <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={32} height={24} style={{ objectFit: "contain", filter: isLightNav ? "none" : "brightness(0) invert(1)", opacity: isLightNav ? 1 : 1, display: "block" }} />
-            </div>
-            <div style={{ width: "1px", height: "18px", background: isLightNav ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)" }} />
-            {/* Theme toggle — cycles theme1 → theme2 → theme3 → theme1 */}
-            <button onClick={() => setTheme(t => t === "theme1" ? "theme2" : "theme1")} title={isLight ? "Switch to Dark" : "Switch to Light"}
-              style={{ padding: "0", borderRadius: "20px", border: "none", background: isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)", cursor: "pointer", width: "40px", height: "22px", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
-              <span style={{ position: "absolute", inset: 0, borderRadius: "20px", border: isLightNav ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(255,255,255,0.15)" }} />
-              <span style={{ position: "absolute", left: isLightNav ? "20px" : "2px", top: "1px", width: "18px", height: "18px", borderRadius: "50%", background: isLightNav ? "#1e1b3a" : "#fff", boxShadow: isLightNav ? "0 1px 4px rgba(0,0,0,0.4)" : "0 1px 4px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", transition: "left 0.2s cubic-bezier(0.4,0,0.2,1)" }}>
-                {isLightNav ? <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="rgba(167,139,250,0.9)" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
-                            : <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="rgba(100,100,120,0.7)" strokeWidth={2}><circle cx="12" cy="12" r="4" /><path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>}
+        {/* Section tabs */}
+        {grocer.provocations.map((p, i) => {
+          const isActive = activeIdx === i + 1;
+          return (
+            <button
+              key={i}
+              onClick={() => scrollTo(i + 1)}
+              title={p.title}
+              style={{
+                height: "34px",
+                borderRadius: "100px",
+                border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", gap: "6px",
+                padding: isActive ? "0 14px 0 10px" : "0 10px",
+                position: "relative", overflow: "hidden",
+                background: isActive ? (isLightNav ? rgba(brand, 0.1) : rgba(brand, 0.18)) : "transparent",
+                transition: "background 0.25s, padding 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+                flexShrink: 0,
+              }}
+              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
+              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            >
+              {/* Number badge — spinning border when active */}
+              <span style={{
+                width: "18px", height: "18px", borderRadius: "50%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0, position: "relative",
+                background: isActive ? brand : isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+                transition: "background 0.25s",
+              }}>
+                <span style={{ fontSize: "9px", fontWeight: 800, letterSpacing: "0.04em", color: isActive ? "#fff" : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)", lineHeight: 1, position: "relative", zIndex: 1 }}>
+                  {p.number}
+                </span>
               </span>
-            </button>
-            {/* Logout */}
-            <button onClick={() => { sessionStorage.removeItem("sseb_grocer_id"); router.replace("/"); }} title="Log out"
-              style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "7px", border: isLightNav ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.12)", cursor: "pointer", background: "transparent", color: isLightNav ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", transition: "all 0.15s" }}
-              onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = isLightNav ? "rgba(0,0,0,0.9)" : "#fff"; b.style.borderColor = isLightNav ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.4)"; }}
-              onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = isLightNav ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)"; b.style.borderColor = isLightNav ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)"; }}>
-              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              Logout
-            </button>
-          </div>
-        </div>
 
-        {/* Divider */}
-        <div style={{ height: "1px", background: isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.07)" }} />
-
-        {/* ROW 2 — Tab bar */}
-        <div style={{ height: "46px", padding: "0 40px", display: "flex", alignItems: "stretch" }}>
-          {grocer.provocations.map((p, i) => {
-            const isActive = activeIdx === i + 1;
-            return (
-              <button
-                key={i}
-                onClick={() => scrollTo(i + 1)}
-                title={p.title}
-                style={{
-                  flex: 1, border: "none", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",
-                  padding: "0 6px", position: "relative",
-                  background: isActive ? (isLightNav ? rgba(brand, 0.06) : rgba(brand, 0.1)) : "transparent",
-                  borderBottom: isActive ? `3px solid ${brand}` : "3px solid transparent",
-                  borderTop: "3px solid transparent",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={e => { if (!isActive) { const b = e.currentTarget as HTMLButtonElement; b.style.background = isLightNav ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)"; b.style.borderBottomColor = isLightNav ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)"; }}}
-                onMouseLeave={e => { if (!isActive) { const b = e.currentTarget as HTMLButtonElement; b.style.background = "transparent"; b.style.borderBottomColor = "transparent"; }}}
-              >
-                <span style={{ fontSize: "10px", fontWeight: 800, color: isActive ? brand : isLightNav ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.3)", letterSpacing: "0.1em", flexShrink: 0, transition: "color 0.2s" }}>{p.number}</span>
-                <span style={{ fontSize: "11.5px", fontWeight: isActive ? 700 : 400, letterSpacing: "0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: isActive ? (isLightNav ? "rgba(0,0,0,0.9)" : "#fff") : isLightNav ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", transition: "color 0.2s" }}>
+              {/* Label — only visible when active */}
+              {isActive && (
+                <span style={{
+                  fontSize: "10.5px", fontWeight: 700, letterSpacing: "0.02em",
+                  color: isLightNav ? "rgba(0,0,0,0.85)" : "#fff",
+                  whiteSpace: "nowrap", maxWidth: "140px",
+                  overflow: "hidden", textOverflow: "ellipsis",
+                }}>
                   {p.title.replace(/^The\s+/i, "")}
                 </span>
-              </button>
-            );
-          })}
-        </div>
+              )}
+            </button>
+          );
+        })}
 
+        {/* Separator */}
+        <div style={{ width: "1px", height: "16px", background: isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", flexShrink: 0 }} />
+
+        {/* Last section (Next Steps) */}
+        <button
+          onClick={() => scrollTo(total + 1)}
+          title="Next Steps"
+          style={{
+            width: "34px", height: "34px", borderRadius: "50%",
+            border: "none", cursor: "pointer", position: "relative",
+            background: activeIdx === total + 1 ? (isLightNav ? rgba(brand, 0.1) : rgba(brand, 0.18)) : "transparent",
+            transition: "background 0.25s",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
+          }}
+          onMouseEnter={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
+          onMouseLeave={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+        >
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={activeIdx === total + 1 ? brand : isLightNav ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)"} strokeWidth={2.2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
       </nav>
 
+      {/* Top-right: utilities */}
+      <div style={{
+        position: "fixed", top: "14px", right: "20px", zIndex: 50,
+        display: "flex", alignItems: "center", gap: "10px",
+      }}>
+        {/* Powered by */}
+        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)", whiteSpace: "nowrap" }}>Powered by</span>
+          <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={28} height={21} style={{ objectFit: "contain", filter: isLightNav ? "none" : "brightness(0) invert(1)", opacity: 0.75, display: "block" }} />
+        </div>
+
+        {/* Theme toggle + logout pill */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: "8px",
+          padding: "7px 10px", borderRadius: "100px",
+          background: isLightNav ? "rgba(255,255,255,0.82)" : "rgba(10,10,20,0.78)",
+          backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
+          border: isLightNav ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
+          boxShadow: isLightNav ? "0 8px 32px rgba(0,0,0,0.1)" : "0 8px 32px rgba(0,0,0,0.5)",
+        }}>
+          <button onClick={() => setTheme(t => t === "theme1" ? "theme2" : "theme1")} title={isLight ? "Switch to Dark" : "Switch to Light"}
+            style={{ padding: "0", borderRadius: "20px", border: "none", background: isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)", cursor: "pointer", width: "36px", height: "20px", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+            <span style={{ position: "absolute", inset: 0, borderRadius: "20px", border: isLightNav ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.12)" }} />
+            <span style={{ position: "absolute", left: isLightNav ? "17px" : "2px", top: "1px", width: "16px", height: "16px", borderRadius: "50%", background: isLightNav ? "#1e1b3a" : "#fff", boxShadow: isLightNav ? "0 1px 4px rgba(0,0,0,0.4)" : "0 1px 4px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", transition: "left 0.2s cubic-bezier(0.4,0,0.2,1)" }}>
+              {isLightNav ? <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="rgba(167,139,250,0.9)" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
+                          : <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="rgba(100,100,120,0.7)" strokeWidth={2}><circle cx="12" cy="12" r="4" /><path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>}
+            </span>
+          </button>
+          <div style={{ width: "1px", height: "14px", background: isLightNav ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)" }} />
+          <button onClick={() => { sessionStorage.removeItem("sseb_grocer_id"); router.replace("/"); }} title="Log out"
+            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "3px 6px", borderRadius: "7px", border: "none", cursor: "pointer", background: "transparent", color: isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)", fontSize: "9px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", transition: "color 0.15s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = isLightNav ? "rgba(0,0,0,0.85)" : "#fff"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)"; }}>
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            Logout
+          </button>
+        </div>
+      </div>
 
       {/* ── NAV SPACER — pushes content below the 85px nav ── */}
 
@@ -464,13 +544,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               {/* White centre mask — keeps text area bright and clean */}
               <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 70% at 30% 50%, rgba(250,250,248,0.82) 0%, rgba(250,250,248,0.45) 55%, transparent 80%)", zIndex: 2, pointerEvents: "none" }} />
 
-              <div className="ru" style={{ animationDelay: "0.02s", padding: "28px 8vw 0", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 2 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: "16px", height: "1px", background: brand }} />
-                  <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: rgba(brand, 0.7) }}>SSEB · 2025</span>
-                </div>
-                <span style={{ fontSize: "10px", color: "rgba(0,0,0,0.3)", letterSpacing: "0.06em" }}>Personalized for {grocer.name}</span>
-              </div>
 
               <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", position: "relative", zIndex: 2, gap: "0" }}>
                 <div className="ru" style={{ animationDelay: "0.06s", marginBottom: "20px" }}>
@@ -1352,14 +1425,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           {/* Left text-area overlay */}
           <div style={{ position:"absolute", inset:0, background:"linear-gradient(90deg, rgba(4,6,14,.72) 0%, rgba(4,6,14,.3) 35%, transparent 60%)", zIndex:2, pointerEvents:"none" }} />
 
-          {/* Top bar — eyebrow */}
-          <div className="ru" style={{ animationDelay:"0.02s", padding:"28px 8vw 0", display:"flex", justifyContent:"space-between", alignItems:"center", position:"relative", zIndex:2 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-              <div style={{ width:"16px", height:"1px", background:brand }} />
-              <span style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.18em", textTransform:"uppercase", color:rgba(brand,0.75) }}>SSEB · 2025</span>
-            </div>
-            <span style={{ fontSize:"10px", color:"rgba(255,255,255,0.18)", letterSpacing:"0.06em" }}>Personalized for {grocer.name}</span>
-          </div>
 
           {/* Main content — fills remaining height */}
           <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", padding:"0 8vw", position:"relative", zIndex:2, gap:"0" }}>
