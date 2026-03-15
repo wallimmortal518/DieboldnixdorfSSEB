@@ -114,6 +114,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
   const totalSections = total + 2;
 
   const [activeIdx, setActiveIdx] = useState(0);
+  const [rippleIdx, setRippleIdx] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -358,116 +359,162 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         </span>
       </div>
 
-      {/* Top-center: floating pill nav */}
+      {/* ── Right-side vertical floating nav ── */}
+      <style>{`
+        @keyframes sidenavEnter {
+          from { opacity: 0; transform: translateX(20px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes inkDrop {
+          0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0.6; }
+          60%  { opacity: 0.25; }
+          100% { transform: translate(-50%, -50%) scale(4.5); opacity: 0; }
+        }
+        @keyframes dotSettle {
+          0%   { transform: scale(1); }
+          40%  { transform: scale(1.45); }
+          70%  { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
+        .sidenav-ink {
+          position: absolute; top: 50%; left: 50%;
+          width: 16px; height: 16px; border-radius: 50%;
+          border: 1px solid var(--dot-color);
+          background: transparent;
+          pointer-events: none;
+          animation: inkDrop 0.9s cubic-bezier(0.2,0.8,0.2,1) forwards;
+        }
+        .sidenav-dot-flash {
+          animation: dotSettle 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards !important;
+        }
+        @keyframes dotPulse {
+          0%, 100% { box-shadow: 0 0 0 0 var(--dot-color), 0 0 6px var(--dot-color); }
+          60%       { box-shadow: 0 0 0 5px transparent, 0 0 16px var(--dot-color); }
+        }
+        @keyframes progressFlow {
+          0%   { background-position: 0% 0%; }
+          100% { background-position: 0% 100%; }
+        }
+        .sidenav-item {
+          display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+          cursor: pointer; opacity: 0;
+          animation: sidenavEnter 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .sidenav-label-wrap {
+          display: grid; grid-template-columns: 0fr;
+          transition: grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1);
+        }
+        .sidenav-item:hover .sidenav-label-wrap { grid-template-columns: 1fr; }
+        .sidenav-label {
+          font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+          white-space: nowrap; overflow: hidden; min-width: 0;
+          opacity: 0; transform: translateX(10px);
+          transition: opacity 0.3s ease 0.1s, transform 0.4s cubic-bezier(0.16,1,0.3,1) 0.06s;
+          pointer-events: none;
+        }
+        .sidenav-item:hover .sidenav-label { opacity: 1; transform: translateX(0); }
+        .sidenav-dot {
+          flex-shrink: 0; border-radius: 50%;
+          transition:
+            width  0.45s cubic-bezier(0.34,1.56,0.64,1),
+            height 0.45s cubic-bezier(0.34,1.56,0.64,1),
+            background 0.3s ease,
+            box-shadow 0.3s ease,
+            transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .sidenav-item:hover:not(.active) .sidenav-dot { transform: scale(1.6); }
+        .sidenav-item.active .sidenav-dot {
+          animation: dotPulse 2.8s ease-in-out infinite;
+        }
+      `}</style>
       <nav style={{
-        position: "fixed", top: "14px", left: "50%", transform: "translateX(-50%)",
+        position: "fixed", right: "24px", top: "50%", transform: "translateY(-50%)",
         zIndex: 50,
-        display: "flex", alignItems: "center", gap: "2px",
-        padding: "6px 8px",
-        borderRadius: "100px",
-        background: isLightNav ? "rgba(255,255,255,0.82)" : "rgba(10,10,20,0.78)",
-        backdropFilter: "blur(28px)",
-        WebkitBackdropFilter: "blur(28px)",
-        border: isLightNav ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.1)",
-        boxShadow: isLightNav
-          ? "0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)"
-          : `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px ${rgba(brand,0.15)}, inset 0 1px 0 rgba(255,255,255,0.06)`,
+        display: "flex", flexDirection: "column", alignItems: "flex-end",
       }}>
-        {/* Hero dot */}
-        <button
-          onClick={() => scrollTo(0)}
-          title="Overview"
-          style={{
-            width: "34px", height: "34px", borderRadius: "50%",
-            border: "none", cursor: "pointer", position: "relative",
-            background: activeIdx === 0 ? (isLightNav ? rgba(brand, 0.1) : rgba(brand, 0.18)) : "transparent",
-            transition: "background 0.25s",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
-          }}
-          onMouseEnter={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
-          onMouseLeave={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-        >
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={activeIdx === 0 ? brand : isLightNav ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)"} strokeWidth={2.2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-        </button>
+        {(() => {
+          const navItems = [
+            { label: "Overview", idx: 0, number: "" },
+            ...grocer.provocations.map((p, i) => ({ label: p.title.replace(/^The\s+/i, ""), idx: i + 1, number: p.number ?? "" })),
+            { label: "Next Steps", idx: total + 1, number: "" },
+          ];
+          const totalItems = navItems.length;
+          // progress: fraction of line filled (0 → 1)
+          const progress = activeIdx / (totalItems - 1);
 
-        {/* Separator */}
-        <div style={{ width: "1px", height: "16px", background: isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", flexShrink: 0 }} />
+          return navItems.map((item, si) => {
+            const isActive = activeIdx === item.idx;
+            const isDone = activeIdx > item.idx;
+            const labelColor = isActive
+              ? (isLightNav ? "rgba(0,0,0,0.85)" : "#fff")
+              : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)";
+            const trackColor = isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
+            const doneColor = rgba(brand, 0.45);
+            const isLast = si === totalItems - 1;
 
-        {/* Section tabs */}
-        {grocer.provocations.map((p, i) => {
-          const isActive = activeIdx === i + 1;
-          return (
-            <button
-              key={i}
-              onClick={() => scrollTo(i + 1)}
-              title={p.title}
-              style={{
-                height: "34px",
-                borderRadius: "100px",
-                border: "none", cursor: "pointer",
-                display: "flex", alignItems: "center", gap: "6px",
-                padding: isActive ? "0 14px 0 10px" : "0 10px",
-                position: "relative", overflow: "hidden",
-                background: isActive ? (isLightNav ? rgba(brand, 0.1) : rgba(brand, 0.18)) : "transparent",
-                transition: "background 0.25s, padding 0.3s cubic-bezier(0.34,1.56,0.64,1)",
-                flexShrink: 0,
-              }}
-              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
-              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-            >
-              {/* Number badge — spinning border when active */}
-              <span style={{
-                width: "18px", height: "18px", borderRadius: "50%",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0, position: "relative",
-                background: isActive ? brand : isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
-                transition: "background 0.25s",
-              }}>
-                <span style={{ fontSize: "9px", fontWeight: 800, letterSpacing: "0.04em", color: isActive ? "#fff" : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)", lineHeight: 1, position: "relative", zIndex: 1 }}>
-                  {p.number}
-                </span>
-              </span>
+            return (
+              <div key={item.idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                <button
+                  onClick={() => {
+                    setRippleIdx(item.idx);
+                    setTimeout(() => setRippleIdx(null), 900);
+                    scrollTo(item.idx);
+                  }}
+                  className={`sidenav-item${isActive ? " active" : ""}`}
+                  style={{
+                    background: "none", border: "none", padding: "3px 0",
+                    display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px",
+                    cursor: "pointer",
+                    animationDelay: `${si * 70}ms`,
+                  }}
+                >
+                  <div className="sidenav-label-wrap">
+                    <span className="sidenav-label" style={{ color: labelColor }}>
+                      {item.number ? `${item.number}  ${item.label}` : item.label}
+                    </span>
+                  </div>
+                  {/* Dot — grows when active, particles + beam on click */}
+                  <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "16px", height: "16px", flexShrink: 0 }}>
+                    <span
+                      className={`sidenav-dot${rippleIdx === item.idx ? " sidenav-dot-flash" : ""}`}
+                      style={{
+                        width:  isActive ? "11px" : "7px",
+                        height: isActive ? "11px" : "7px",
+                        background: isActive ? brand : isDone ? doneColor : isLightNav ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.2)",
+                        boxShadow: isActive ? `0 0 10px ${rgba(brand, 0.6)}` : "none",
+                        ["--dot-color" as string]: rgba(brand, 0.6),
+                      } as React.CSSProperties}
+                    />
+                    {rippleIdx === item.idx && (
+                      <span className="sidenav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />
+                    )}
+                  </span>
+                </button>
 
-              {/* Label — only visible when active */}
-              {isActive && (
-                <span style={{
-                  fontSize: "10.5px", fontWeight: 700, letterSpacing: "0.02em",
-                  color: isLightNav ? "rgba(0,0,0,0.85)" : "#fff",
-                  whiteSpace: "nowrap", maxWidth: "140px",
-                  overflow: "hidden", textOverflow: "ellipsis",
-                }}>
-                  {p.title.replace(/^The\s+/i, "")}
-                </span>
-              )}
-            </button>
-          );
-        })}
-
-        {/* Separator */}
-        <div style={{ width: "1px", height: "16px", background: isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", flexShrink: 0 }} />
-
-        {/* Last section (Next Steps) */}
-        <button
-          onClick={() => scrollTo(total + 1)}
-          title="Next Steps"
-          style={{
-            width: "34px", height: "34px", borderRadius: "50%",
-            border: "none", cursor: "pointer", position: "relative",
-            background: activeIdx === total + 1 ? (isLightNav ? rgba(brand, 0.1) : rgba(brand, 0.18)) : "transparent",
-            transition: "background 0.25s",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
-          }}
-          onMouseEnter={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
-          onMouseLeave={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-        >
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={activeIdx === total + 1 ? brand : isLightNav ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)"} strokeWidth={2.2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-        </button>
+                {/* Connector segment between dots */}
+                {!isLast && (
+                  <div style={{
+                    width: "2px", height: "18px",
+                    marginRight: "7px",
+                    borderRadius: "2px",
+                    background: trackColor,
+                    overflow: "hidden",
+                    position: "relative",
+                  }}>
+                    {/* filled portion */}
+                    <div style={{
+                      position: "absolute", top: 0, left: 0, right: 0,
+                      height: isDone ? "100%" : isActive ? "50%" : "0%",
+                      background: `linear-gradient(to bottom, ${brand}, ${rgba(brand, 0.5)})`,
+                      transition: "height 0.5s cubic-bezier(0.4,0,0.2,1)",
+                      borderRadius: "2px",
+                    }} />
+                  </div>
+                )}
+              </div>
+            );
+          });
+        })()}
       </nav>
 
       {/* Top-right: utilities */}
