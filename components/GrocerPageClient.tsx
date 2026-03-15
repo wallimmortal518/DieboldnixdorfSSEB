@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -121,28 +120,35 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
   useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
-    const obs = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) {
-          const idx = sectionRefs.current.indexOf(e.target as HTMLElement);
-          if (idx !== -1) setActiveIdx(idx);
-        }
-      }),
-      { root, threshold: 0.6 }
-    );
-    sectionRefs.current.forEach(el => el && obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+    // Reset scroll to top on theme change so snap positions are correct
+    root.scrollTo({ top: 0 });
+    setActiveIdx(0);
+    let obs: IntersectionObserver;
+    const timer = setTimeout(() => {
+      obs = new IntersectionObserver(
+        entries => entries.forEach(e => {
+          if (e.isIntersecting) {
+            const idx = sectionRefs.current.indexOf(e.target as HTMLElement);
+            if (idx !== -1) setActiveIdx(idx);
+          }
+        }),
+        { root, threshold: 0.5 }
+      );
+      sectionRefs.current.forEach(el => el && obs.observe(el));
+    }, 100);
+    return () => { clearTimeout(timer); obs?.disconnect(); };
+  }, [theme]);
 
   const scrollTo = (idx: number) => {
     if (!scrollRef.current) return;
     scrollRef.current.scrollTo({ top: idx * window.innerHeight, behavior: "smooth" });
   };
 
-  const isT2 = theme === "theme2";
-  // Scroll-reveal: wire up .reveal elements for T2
+  const isLight = theme === "theme2";
+  const isLightNav = isLight;
+  // Scroll-reveal: wire up .reveal elements for T2 and light theme
   useEffect(() => {
-    if (!isT2) return;
+    if (!isLight) return;
     const root = scrollRef.current;
     if (!root) return;
     let obs: IntersectionObserver;
@@ -155,10 +161,29 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       els.forEach(el => obs.observe(el));
     }, 50);
     return () => { clearTimeout(timer); obs?.disconnect(); };
-  }, [isT2]);
+  }, [isLight]);
+
+  // Scroll-reveal: wire up .t1-reveal elements for T1
+  useEffect(() => {
+    if (isLight) return;
+    const root = scrollRef.current;
+    if (!root) return;
+    let obs: IntersectionObserver;
+    const timer = setTimeout(() => {
+      const els = root.querySelectorAll<HTMLElement>(".t1-reveal");
+      // reset visibility so re-running after theme switch works
+      els.forEach(el => el.classList.remove("t1-visible"));
+      obs = new IntersectionObserver(
+        entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("t1-visible"); }),
+        { root, threshold: 0.08, rootMargin: "0px 0px -20px 0px" }
+      );
+      els.forEach(el => obs.observe(el));
+    }, 50);
+    return () => { clearTimeout(timer); obs?.disconnect(); };
+  }, [isLight]);
 
   return (
-    <div style={{ background: theme === "theme2" ? "#f8f8f6" : "#080c12", position: "relative", cursor: "none" }}>
+    <div style={{ background: isLight ? "#f8f8f6" : "#080c12", position: "relative", cursor: "none" }}>
       <style>{`
         /* ── T1 animations ── */
         @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
@@ -170,6 +195,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         @keyframes navLightSpin  { to { transform: rotate(360deg); } }
         @keyframes blink         { 0%,100%{opacity:1} 50%{opacity:0.3} }
         @keyframes glowDrift     { 0%,100%{transform:scale(1) translate(0,0);opacity:.7} 50%{transform:scale(1.18) translate(2%,2%);opacity:1} }
+        @keyframes heroOrb1      { 0%{transform:translate(0,0) scale(1);opacity:.9} 33%{transform:translate(12%,-8%) scale(1.25);opacity:1} 66%{transform:translate(-8%,10%) scale(.82);opacity:.75} 100%{transform:translate(0,0) scale(1);opacity:.9} }
+        @keyframes heroOrb2      { 0%{transform:translate(0,0) scale(1);opacity:.85} 40%{transform:translate(-14%,10%) scale(1.3);opacity:1} 70%{transform:translate(10%,-6%) scale(.8);opacity:.7} 100%{transform:translate(0,0) scale(1);opacity:.85} }
+        @keyframes heroOrb3      { 0%{transform:translate(0,0) scale(.9);opacity:.6} 50%{transform:translate(8%,14%) scale(1.2);opacity:1} 100%{transform:translate(0,0) scale(.9);opacity:.6} }
         @keyframes floatBob      { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-18px) rotate(4deg)} }
         @keyframes labelShimmer  { from{background-position:-200% center} to{background-position:200% center} }
         @keyframes iconPulse     { 0%,100%{transform:scale(1)} 50%{transform:scale(1.35)} }
@@ -256,7 +284,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         /* Pill buttons */
         .t2-btn-primary {
           display: inline-flex; align-items: center; gap: 8px;
-          padding: 13px 28px; border-radius: 50px;
+          padding: 13px 28px; border-radius: 7px;
           background: #7c3aed; border: none; color: #fff; cursor: pointer;
           font-family: var(--font-heading), sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .04em;
           box-shadow: 0 4px 28px rgba(124,58,237,.45);
@@ -265,7 +293,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         .t2-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(124,58,237,.55); }
         .t2-btn-ghost {
           display: inline-flex; align-items: center; gap: 8px;
-          padding: 13px 28px; border-radius: 50px;
+          padding: 13px 28px; border-radius: 7px;
           background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.14);
           backdrop-filter: blur(12px); color: rgba(220,215,255,.65); cursor: pointer;
           font-family: var(--font-heading), sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .04em;
@@ -275,118 +303,133 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
         ::-webkit-scrollbar { display: none; }
 
+        /* ── T1 bullet box — spinning conic border ── */
+        @keyframes t1SpinBorder { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+        .t1-bullet-box {
+          position: relative;
+          border-radius: 7px;
+          background: var(--bb-bg, rgba(124,58,237,.05));
+          overflow: hidden;
+        }
+        .t1-bullet-box::before {
+          content: '';
+          position: absolute;
+          top: 50%; left: 50%;
+          width: 300%; height: 300%;
+          background: conic-gradient(from 0deg, transparent 85%, var(--bb-color-bright, rgba(124,58,237,.9)) 92%, transparent 100%);
+          animation: t1SpinBorder 4s linear infinite;
+          z-index: 0;
+        }
+        .t1-bullet-box::after {
+          content: '';
+          position: absolute;
+          inset: 1px;
+          border-radius: 6px;
+          background: var(--bb-fill, #080c12);
+          z-index: 1;
+        }
+        .t1-bullet-grad {
+          position: absolute; inset: 1px; border-radius: 6px;
+          background: linear-gradient(135deg, var(--bb-grad-start, rgba(124,58,237,.06)) 0%, transparent 55%);
+          z-index: 2; pointer-events: none;
+        }
+        .t1-bullet-box > *:not(.t1-bullet-grad) { position: relative; z-index: 3; }
+
+        /* ── T1 scroll-reveal for bullet rows ── */
+        .t1-reveal         { opacity:0; transform:translateY(14px); transition: opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1); }
+        .t1-reveal.t1-visible { opacity:1; transform:translateY(0); }
+        .t1-reveal-d1      { transition-delay: 80ms; }
+        .t1-reveal-d2      { transition-delay: 180ms; }
+        .t1-reveal-d3      { transition-delay: 280ms; }
+
       `}</style>
 
       {/* ── NAV ── */}
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-        height: "52px", padding: "0 56px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: theme === "theme2" ? "rgba(248,248,246,0.95)" : "rgba(8,12,18,0.95)",
-        backdropFilter: "blur(16px)",
-        borderBottom: theme === "theme2" ? "1px solid rgba(0,0,0,0.07)" : "1px solid rgba(255,255,255,0.04)",
+        display: "flex", flexDirection: "column",
+        background: isLight ? "rgba(250,250,248,1)" : "rgba(8,8,16,1)",
+        backdropFilter: "blur(24px)",
+        borderBottom: isLight ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.1)",
+        boxShadow: isLight ? "0 4px 24px rgba(0,0,0,0.08)" : `0 4px 32px rgba(0,0,0,0.7), 0 1px 0 ${rgba(brand,0.3)}`,
       }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", color: theme === "theme2" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.22)", textDecoration: "none" }}>
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>Back</span>
-        </Link>
 
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={36} height={27} style={{ objectFit: "contain", filter: theme === "theme2" ? "none" : "brightness(0) invert(1)", opacity: theme === "theme2" ? 0.7 : 0.75, display: "block" }} />
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {/* ── Logout ── */}
-          <button
-            onClick={() => { sessionStorage.removeItem("sseb_grocer_id"); router.replace("/"); }}
-            title="Log out"
-            style={{
-              display: "flex", alignItems: "center", gap: "5px",
-              padding: "4px 10px", borderRadius: "6px", border: "none", cursor: "pointer",
-              background: theme === "theme2" ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.07)",
-              color: theme === "theme2" ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)",
-              fontSize: "9px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = theme === "theme2" ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.85)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = theme === "theme2" ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)"; }}
-          >
-            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Logout
-          </button>
-
-          {/* ── Dark/Light Toggle ── */}
-          <button
-            onClick={() => setTheme(t => t === "theme1" ? "theme2" : "theme1")}
-            title={isT2 ? "Switch to Dark" : "Switch to Light"}
-            style={{
-              display: "flex", alignItems: "center", gap: "0",
-              padding: "0", borderRadius: "20px", border: "none",
-              background: isT2 ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-              cursor: "pointer", width: "44px", height: "24px", position: "relative",
-              transition: "background 0.2s",
-              flexShrink: 0,
-            }}
-          >
-            {/* Track */}
-            <span style={{
-              position: "absolute", inset: 0, borderRadius: "20px",
-              border: isT2 ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.1)",
-            }} />
-            {/* Thumb */}
-            <span style={{
-              position: "absolute",
-              left: isT2 ? "22px" : "2px",
-              width: "20px", height: "20px", borderRadius: "50%",
-              background: isT2 ? "#1e1b3a" : "#fff",
-              boxShadow: isT2 ? "0 1px 4px rgba(0,0,0,0.4)" : "0 1px 4px rgba(0,0,0,0.15)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "left 0.2s cubic-bezier(0.4,0,0.2,1), background 0.2s",
-            }}>
-              {isT2 ? (
-                /* Moon icon */
-                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="rgba(167,139,250,0.9)" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-                </svg>
-              ) : (
-                /* Sun icon */
-                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="rgba(100,100,120,0.7)" strokeWidth={2}>
-                  <circle cx="12" cy="12" r="4" /><path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                </svg>
-              )}
+        {/* ROW 1 — Top bar */}
+        <div style={{ height: "48px", padding: "0 40px", display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
+          {/* Left — report label */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: brand, boxShadow: `0 0 10px ${rgba(brand, 0.9)}` }} />
+            <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.55)" }}>
+              Self-Service Excellence Benchmark · 2025
             </span>
-          </button>
+          </div>
+
+          <div />
+
+          {/* Right — utilities */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+              <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.6)", whiteSpace: "nowrap" }}>Powered by</span>
+              <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={32} height={24} style={{ objectFit: "contain", filter: isLightNav ? "none" : "brightness(0) invert(1)", opacity: isLightNav ? 1 : 1, display: "block" }} />
+            </div>
+            <div style={{ width: "1px", height: "18px", background: isLightNav ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)" }} />
+            {/* Theme toggle — cycles theme1 → theme2 → theme3 → theme1 */}
+            <button onClick={() => setTheme(t => t === "theme1" ? "theme2" : "theme1")} title={isLight ? "Switch to Dark" : "Switch to Light"}
+              style={{ padding: "0", borderRadius: "20px", border: "none", background: isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)", cursor: "pointer", width: "40px", height: "22px", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+              <span style={{ position: "absolute", inset: 0, borderRadius: "20px", border: isLightNav ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(255,255,255,0.15)" }} />
+              <span style={{ position: "absolute", left: isLightNav ? "20px" : "2px", top: "1px", width: "18px", height: "18px", borderRadius: "50%", background: isLightNav ? "#1e1b3a" : "#fff", boxShadow: isLightNav ? "0 1px 4px rgba(0,0,0,0.4)" : "0 1px 4px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", transition: "left 0.2s cubic-bezier(0.4,0,0.2,1)" }}>
+                {isLightNav ? <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="rgba(167,139,250,0.9)" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
+                            : <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="rgba(100,100,120,0.7)" strokeWidth={2}><circle cx="12" cy="12" r="4" /><path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>}
+              </span>
+            </button>
+            {/* Logout */}
+            <button onClick={() => { sessionStorage.removeItem("sseb_grocer_id"); router.replace("/"); }} title="Log out"
+              style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "7px", border: isLightNav ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.12)", cursor: "pointer", background: "transparent", color: isLightNav ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", transition: "all 0.15s" }}
+              onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = isLightNav ? "rgba(0,0,0,0.9)" : "#fff"; b.style.borderColor = isLightNav ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.4)"; }}
+              onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.color = isLightNav ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)"; b.style.borderColor = isLightNav ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)"; }}>
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              Logout
+            </button>
+          </div>
         </div>
+
+        {/* Divider */}
+        <div style={{ height: "1px", background: isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.07)" }} />
+
+        {/* ROW 2 — Tab bar */}
+        <div style={{ height: "46px", padding: "0 40px", display: "flex", alignItems: "stretch" }}>
+          {grocer.provocations.map((p, i) => {
+            const isActive = activeIdx === i + 1;
+            return (
+              <button
+                key={i}
+                onClick={() => scrollTo(i + 1)}
+                title={p.title}
+                style={{
+                  flex: 1, border: "none", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",
+                  padding: "0 6px", position: "relative",
+                  background: isActive ? (isLightNav ? rgba(brand, 0.06) : rgba(brand, 0.1)) : "transparent",
+                  borderBottom: isActive ? `3px solid ${brand}` : "3px solid transparent",
+                  borderTop: "3px solid transparent",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={e => { if (!isActive) { const b = e.currentTarget as HTMLButtonElement; b.style.background = isLightNav ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)"; b.style.borderBottomColor = isLightNav ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)"; }}}
+                onMouseLeave={e => { if (!isActive) { const b = e.currentTarget as HTMLButtonElement; b.style.background = "transparent"; b.style.borderBottomColor = "transparent"; }}}
+              >
+                <span style={{ fontSize: "10px", fontWeight: 800, color: isActive ? brand : isLightNav ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.3)", letterSpacing: "0.1em", flexShrink: 0, transition: "color 0.2s" }}>{p.number}</span>
+                <span style={{ fontSize: "11.5px", fontWeight: isActive ? 700 : 400, letterSpacing: "0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: isActive ? (isLightNav ? "rgba(0,0,0,0.9)" : "#fff") : isLightNav ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", transition: "color 0.2s" }}>
+                  {p.title.replace(/^The\s+/i, "")}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
       </nav>
 
-      {/* ── PROGRESS ── */}
-      <div style={{ position: "fixed", top: "52px", left: 0, right: 0, height: "1px", background: theme === "theme2" ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.03)", zIndex: 50 }}>
-        <div style={{
-          height: "100%",
-          width: `${(activeIdx / (totalSections - 1)) * 100}%`,
-          background: brand,
-          transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
-        }} />
-      </div>
 
-      {/* ── SIDE DOTS ── */}
-      <div style={{
-        position: "fixed", right: "20px", top: "50%", transform: "translateY(-50%)",
-        zIndex: 50, display: "flex", flexDirection: "column", gap: "5px",
-      }}>
-        {Array.from({ length: totalSections }).map((_, i) => (
-          <button key={i} onClick={() => scrollTo(i)} style={{
-            width: "2px", height: activeIdx === i ? "20px" : "4px",
-            borderRadius: "2px", border: "none", padding: 0, cursor: "pointer",
-            background: activeIdx === i ? brand : theme === "theme2" ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.08)",
-            transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)",
-          }} />
-        ))}
-      </div>
+      {/* ── NAV SPACER — pushes content below the 85px nav ── */}
 
       {/* ── CURSOR ── */}
       <CustomCursor brand={brand} />
@@ -399,18 +442,27 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           scrollSnapType: "y mandatory",
           scrollbarWidth: "none",
           position: "relative", zIndex: 2,
+          overscrollBehavior: "contain",
         }}
       >
         {/* ══ LIGHT THEME ══════════════════════════════════════════════════════ */}
-        {theme === "theme2" && (
+        {isLight && (
           <>
             {/* LIGHT HERO */}
             <section
               ref={el => { sectionRefs.current[0] = el; }}
-              style={{ height: "100vh", scrollSnapAlign: "start", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", background: "#f8f8f6" }}
+              style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", background: "#fafaf8" }}
             >
-              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 50% 60% at 10% 20%, ${rgba(brand, 0.07)} 0%, transparent 55%)`, pointerEvents: "none" }} />
-              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 40% 40% at 90% 80%, ${rgba(brand, 0.05)} 0%, transparent 55%)`, pointerEvents: "none" }} />
+              {/* Base: clean white */}
+              <div style={{ position: "absolute", inset: 0, background: "#fafaf8", zIndex: 0 }} />
+              {/* Orb 1 — brand, top-right bloom */}
+              <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "75vw", height: "80vh", background: `radial-gradient(ellipse, ${rgba(brand,.28)} 0%, ${rgba(brand,.1)} 38%, transparent 65%)`, animation: "heroOrb1 14s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
+              {/* Orb 2 — brand, bottom-left */}
+              <div style={{ position: "absolute", bottom: "-15%", left: "-10%", width: "60vw", height: "65vh", background: `radial-gradient(ellipse, ${rgba(brand,.22)} 0%, ${rgba(brand,.07)} 40%, transparent 65%)`, animation: "heroOrb2 10s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
+              {/* Orb 3 — center-right soft pulse */}
+              <div style={{ position: "absolute", top: "25%", right: "10%", width: "50vw", height: "50vh", background: `radial-gradient(ellipse, ${rgba(brand,.14)} 0%, transparent 60%)`, animation: "heroOrb3 7s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
+              {/* White centre mask — keeps text area bright and clean */}
+              <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 70% at 30% 50%, rgba(250,250,248,0.82) 0%, rgba(250,250,248,0.45) 55%, transparent 80%)", zIndex: 2, pointerEvents: "none" }} />
 
               <div className="ru" style={{ animationDelay: "0.02s", padding: "28px 8vw 0", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 2 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -421,8 +473,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               </div>
 
               <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", position: "relative", zIndex: 2, gap: "0" }}>
-                <div className="ru" style={{ animationDelay: "0.06s", fontSize: "clamp(0.7rem,1vw,0.85rem)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: rgba(brand, 0.55), marginBottom: "16px" }}>
-                  {grocer.shortName.toUpperCase()}
+                <div className="ru" style={{ animationDelay: "0.06s", marginBottom: "20px" }}>
+                  <img src={grocer.logoUrl} alt={grocer.shortName} style={{ height: `${grocer.logoHeight ?? 36}px`, width: "auto", maxWidth: "200px", objectFit: "contain", display: "block" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                 </div>
                 <h1 className="ru" style={{ animationDelay: "0.1s", fontSize: "clamp(1.8rem,2.8vw,3rem)", fontWeight: 900, color: "#111", lineHeight: 1.0, letterSpacing: "-0.04em", maxWidth: "22ch", marginBottom: "32px" }}>
                   {grocer.heroHeadline}
@@ -442,16 +494,16 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   <p style={{ fontSize: "clamp(0.9rem,1.1vw,1rem)", color: "rgba(0,0,0,0.45)", lineHeight: 1.75, maxWidth: "480px", margin: 0 }}>
                     {grocer.heroSubheadline}
                   </p>
-                  <button onClick={() => scrollTo(1)} style={{ flexShrink: 0, padding: "14px 32px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: `0 4px 20px ${rgba(brand, 0.3)}` }}>
-                    View {total} Findings →
+                  <button onClick={() => scrollTo(1)} style={{ flexShrink: 0, padding: "14px 32px", borderRadius: "7px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: `0 4px 20px ${rgba(brand, 0.3)}` }}>
+                    View Insights →
                   </button>
                 </div>
               </div>
 
               <div style={{ height: "1px", background: "rgba(0,0,0,0.07)", position: "relative", zIndex: 2 }} />
               <div style={{ padding: "12px 8vw", display: "flex", justifyContent: "space-between", position: "relative", zIndex: 2 }}>
-                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.3 }} />
-                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.2)" }}>131 retail executives · 2,533 shoppers</span>
+                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.4 }} />
+                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.38)" }}>131 retail executives · 2,533 shoppers</span>
               </div>
             </section>
 
@@ -465,17 +517,20 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `56px ${isA ? "48px" : "8vw"} 56px ${isA ? "8vw" : "48px"}`, position: "relative", zIndex: 1, gap: "20px" }}>
                   <div className="ru" style={{ animationDelay: "0.04s", display: "flex", alignItems: "center", gap: "10px" }}>
                     <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: brand }}>{p.title}</span>
-                    <span style={{ color: "rgba(0,0,0,0.2)", fontSize: "11px" }}>/ {total}</span>
                   </div>
                   <WordFadeTitle text={p.hook} style={{ fontSize: "clamp(1.9rem,2.8vw,3rem)", fontWeight: 900, color: "#111", lineHeight: 1.05, letterSpacing: "-0.04em", margin: 0 }} />
                   <div className="rfi" style={{ animationDelay: "0.14s", height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.3)}, transparent)` }} />
-                  <p className="ru" style={{ animationDelay: "0.16s", fontSize: "clamp(1rem,1.2vw,1.1rem)", color: "rgba(0,0,0,0.45)", lineHeight: 1.9, margin: 0 }}>{p.body}</p>
+                  <p className="ru" style={{ animationDelay: "0.16s", fontSize: "clamp(1rem,1.2vw,1.1rem)", color: "rgba(0,0,0,0.65)", lineHeight: 1.9, margin: 0 }}>{p.body}</p>
                   <div className="rfi" style={{ animationDelay:"0.2s", display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(0,0,0,0.45)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.5), rgba(75,29,110,0.5), rgba(155,27,42,0.5))", display:"inline-block", transition:"all 0.2s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.85), rgba(75,29,110,0.85), rgba(155,27,42,0.85))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(0,0,0,0.75)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.5), rgba(75,29,110,0.5), rgba(155,27,42,0.5))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(0,0,0,0.45)"; }}>
-                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#f8f8f6" }}>{label}</span>
+                    {([
+                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(0,0,0,0.6)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(0,0,0,0.15)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(0,0,0,0.05)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(0,0,0,0.3)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(0,0,0,0.15)"; }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                        {label}
                       </a>
                     ))}
                   </div>
@@ -515,9 +570,10 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   </div>
                   <div className="reveal reveal-d2" style={{ height: "1px", background: "rgba(0,0,0,0.07)" }} />
                   <div className="reveal reveal-d3">
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0", borderRadius: "7px", overflow: "hidden", background: rgba(brand, 0.04), border: `1px solid ${rgba(brand, 0.1)}` }}>
+                    <div className="t1-bullet-box" style={{ display: "flex", flexDirection: "column", gap: "0", "--bb-color-bright": rgba(brand, 0.7), "--bb-grad-start": rgba(brand, 0.18), "--bb-fill": "#ffffff" } as React.CSSProperties}>
+                      <div className="t1-bullet-grad" />
                       {p.bullets.map((b, bi) => (
-                        <div key={bi} style={{ display: "flex", gap: "14px", alignItems: "flex-start", padding: "14px 18px", borderBottom: bi < p.bullets.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none" }}>
+                        <div key={bi} style={{ display: "flex", gap: "14px", alignItems: "flex-start", padding: "14px 18px" }}>
                           <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: brand, flexShrink: 0, marginTop: "7px" }} />
                           <p style={{ fontSize: "clamp(0.9rem,1.05vw,1rem)", color: "rgba(0,0,0,0.5)", lineHeight: 1.6, margin: 0 }}>{b}</p>
                         </div>
@@ -529,83 +585,126 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               );
 
               return (
-                <section key={`light-${idx}`} ref={el => { sectionRefs.current[idx + 1] = el; }} style={{ height: "100vh", scrollSnapAlign: "start", display: "grid", gridTemplateColumns: isA ? "55% 45%" : "45% 55%", position: "relative", overflow: "hidden", background: bg }}>
+                <section key={`light-${idx}`} ref={el => { sectionRefs.current[idx + 1] = el; }} style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "grid", gridTemplateColumns: isA ? "55% 45%" : "45% 55%", position: "relative", overflow: "hidden", background: bg }}>
                   <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 55% 65% at ${isA ? "100%" : "0%"} 50%, ${rgba(brand, 0.05)} 0%, transparent 55%)`, pointerEvents: "none" }} />
                   {isA ? <>{textCol}{statCol}</> : <>{statCol}{textCol}</>}
                 </section>
               );
             })())}
 
-            {/* LIGHT END */}
+            {/* LIGHT END — CLOSING MANIFESTO */}
             <section
               ref={el => { sectionRefs.current[total + 1] = el; }}
-              style={{ height: "100vh", scrollSnapAlign: "start", display: "grid", gridTemplateColumns: "1fr 1fr", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#f8f8f6" }}
+              style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#f8f8f6" }}
             >
-              {/* Subtle gradient accents */}
-              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 50% 70% at 0% 100%, ${rgba(brand, 0.06)} 0%, transparent 55%)`, pointerEvents: "none" }} />
-              <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 40% 50% at 100% 0%, rgba(27,79,155,0.04) 0%, transparent 55%)", pointerEvents: "none" }} />
+              {/* Ambient accents */}
+              <div style={{ position: "absolute", top: "0%", left: "-10%", width: "60vw", height: "60vh", background: `radial-gradient(ellipse,${rgba(brand,.06)} 0%,transparent 58%)`, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", bottom: "0%", right: "-5%", width: "50vw", height: "50vh", background: `radial-gradient(ellipse,${rgba(brand,.04)} 0%,transparent 60%)`, pointerEvents: "none" }} />
 
-              {/* LEFT — big typographic side */}
-              <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 48px 0 8vw", position: "relative", zIndex: 1, gap: "24px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: "24px", height: "1px", background: rgba(brand, 0.4) }} />
-                  <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: rgba(brand, 0.5) }}>End of Report</span>
-                </div>
-                <div>
-                  <h2 style={{ fontSize: "clamp(2.4rem,4vw,5rem)", fontWeight: 900, color: "#0a0a0a", lineHeight: 0.95, letterSpacing: "-0.04em", margin: 0 }}>Next<br /><span style={{ WebkitTextStroke: `1.5px ${rgba(brand, 0.35)}`, color: "transparent" }}>Steps.</span></h2>
-                </div>
-                <div style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.3)}, transparent)`, maxWidth: "320px" }} />
-                <p style={{ fontSize: "0.88rem", color: "rgba(0,0,0,0.38)", lineHeight: 1.8, maxWidth: "360px", margin: 0 }}>
-                  The full SSEB report includes the complete maturity framework, retailer benchmarking, and a prioritized roadmap built for your scale.
-                </p>
-                <button onClick={() => scrollTo(0)} style={{ alignSelf: "flex-start", padding: "0", background: "none", border: "none", color: "rgba(0,0,0,0.2)", cursor: "pointer", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>↑ Back to top</button>
-              </div>
+              <div className="ru" style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "0" }}>
 
-              {/* RIGHT — action card */}
-              <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw 0 48px", position: "relative", zIndex: 1, gap: "16px" }}>
-                {/* Card */}
-                <div style={{ borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(0,0,0,0.07)", background: "#fff", boxShadow: "0 8px 40px rgba(0,0,0,0.06)" }}>
-                  {/* Gradient bar top */}
-                  <div style={{ height: "3px", background: "linear-gradient(90deg, #1B4F9B, #4B1D6E, #9B1B2A)" }} />
-                  <div style={{ padding: "36px 36px 32px" }}>
-                    <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(0,0,0,0.3)", marginBottom: "20px" }}>What happens next</div>
-                    {[
-                      { n: "01", title: "Access the Full Report", desc: "Get the complete benchmark data, maturity framework, and retailer comparisons." },
-                      { n: "02", title: "30-Min Walkthrough", desc: "A Diebold Nixdorf consultant walks you through findings relevant to your operations." },
-                    ].map((step) => (
-                      <div key={step.n} style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
-                        <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <span style={{ fontSize: "9px", fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>{step.n}</span>
-                        </div>
-                        <div>
-                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#111", marginBottom: "4px" }}>{step.title}</div>
-                          <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.4)", lineHeight: 1.6 }}>{step.desc}</div>
-                        </div>
+                {/* ZONE 1: Statement */}
+                <div style={{ marginBottom: "36px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                    <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
+                    <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>SSEB 2025 · Closing Thoughts</span>
+                  </div>
+                  <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#0a0a0a", margin: 0, maxWidth: "720px" }}>
+                    The gap between{" "}
+                    <span style={{ color: brand }}>knowing</span>
+                    {" "}and{" "}
+                    <span style={{ WebkitTextStroke: `1.5px ${rgba(brand,.5)}`, color: "transparent" }}>acting</span>
+                    {" "}is where{" "}
+                    <span style={{ color: brand }}>{grocer.shortName}</span>
+                    {" "}wins or loses.
+                  </h2>
+                </div>
+
+                {/* ZONE 2: Divider + attribution pills */}
+                <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
+                  <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,${rgba(brand,.3)},transparent)` }} />
+                  {[
+                    { v: "131", l: "Retail Executives" },
+                    { v: "2,533", l: "Shoppers Surveyed" },
+                    { v: "10", l: "Retailers Benchmarked" },
+                  ].map((chip) => (
+                    <div key={chip.v} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.15)}`, flexShrink: 0 }}>
+                      <span style={{ fontSize: "13px", fontWeight: 900, color: brand, lineHeight: 1, letterSpacing: "-.04em" }}>{chip.v}</span>
+                      <span style={{ fontSize: "9px", color: "rgba(0,0,0,.4)", letterSpacing: ".04em" }}>{chip.l}</span>
+                    </div>
+                  ))}
+                  <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,transparent,${rgba(brand,.1)})` }} />
+                </div>
+
+                {/* ZONE 3: Two invitation cards */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+
+                  {/* Card A — Full Report */}
+                  <div style={{ borderRadius: "16px", overflow: "hidden", background: "linear-gradient(135deg,#1B4F9B,#4B1D6E 55%,#9B1B2A)", boxShadow: `0 8px 40px rgba(27,79,155,.2), 0 0 0 1px rgba(255,255,255,.1)`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative" }}>
+                    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,255,255,.08) 0%,transparent 60%)", pointerEvents: "none" }} />
+                    <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.9)" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                       </div>
-                    ))}
-                    <div style={{ height: "1px", background: "rgba(0,0,0,0.06)", marginBottom: "24px" }} />
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                      <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E, #9B1B2A)", border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(27,79,155,0.25)" }}>
-                        Access Full Report
-                      </button>
-                      <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "transparent", border: "1px solid rgba(0,0,0,0.1)", color: "rgba(0,0,0,0.5)", cursor: "pointer", fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em" }}>
-                        Schedule a Call with a Consultant
+                      <div>
+                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", marginBottom: "6px" }}>Full Report</div>
+                        <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
+                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,.55)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                      </div>
+                      <div style={{ flex: 1 }} />
+                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)", color: "#fff", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.25)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.15)"; }}>
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Download Report →
                       </button>
                     </div>
                   </div>
+
+                  {/* Card B — Schedule Call */}
+                  <div style={{ borderRadius: "16px", background: "#fff", border: `1px solid ${rgba(brand,.15)}`, boxShadow: "0 4px 24px rgba(0,0,0,.06)", padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "60%", height: "60%", background: `radial-gradient(ellipse,${rgba(brand,.06)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+                    <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.08), border: `1px solid ${rgba(brand,.2)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brand} strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(0,0,0,.3)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                        <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#0a0a0a", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>30-Min Strategy Call</div>
+                        <div style={{ fontSize: "11px", color: "rgba(0,0,0,.45)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                      </div>
+                      <div style={{ flex: 1 }} />
+                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.35)}`, color: brand, cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = rgba(brand,.06); (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.6); }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.35); }}>
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        Schedule a Call →
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Back to top */}
+                <div style={{ marginTop: "24px", display: "flex", justifyContent: "center" }}>
+                  <button onClick={() => scrollTo(0)} style={{ padding: "7px 16px", borderRadius: "7px", background: "none", border: "1px solid rgba(0,0,0,0.15)", color: "rgba(0,0,0,0.5)", cursor: "pointer", fontSize: "10px", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", transition: "all 0.15s" }}
+                    onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "rgba(0,0,0,0.05)"; b.style.color = "rgba(0,0,0,0.8)"; }}
+                    onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "none"; b.style.color = "rgba(0,0,0,0.5)"; }}>
+                    ↑ Back to Top
+                  </button>
                 </div>
               </div>
 
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(0,0,0,0.05)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
-                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.25 }} />
-                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.2)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.15)" }}>© 2025 Incisiv</span>
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
+                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.4 }} />
+                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.38)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
+                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)" }}>© 2025 Incisiv</span>
               </div>
             </section>
           </>
         )}
 
-        {isT2 && (
+        {false && (
           <>
             {/* ══ T2 · HERO ═══════════════════════════════════════════════════════
                 Two-zone layout: top 60% = headline content, bottom 40% = stat bento row.
@@ -614,21 +713,27 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <section
               ref={el => { sectionRefs.current[0] = el; }}
               style={{
-                height: "100vh", scrollSnapAlign: "start",
+                height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always",
                 display: "flex", flexDirection: "column",
                 position: "relative", overflow: "hidden",
+                background: "#06040f",
               }}
             >
-              {/* Background layers */}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(125deg,#080614 0%,#0d0b1f 55%,#090618 100%)", zIndex: 0 }} />
-              {/* Primary purple glow — upper centre */}
-              <div style={{ position: "absolute", top: "-5%", left: "35%", width: "90vw", height: "70vh", background: "radial-gradient(ellipse,rgba(109,40,217,.2) 0%,transparent 60%)", animation: "glowDrift 6s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
-              {/* Brand accent glow — lower right */}
-              <div style={{ position: "absolute", bottom: "20%", right: "0%", width: "500px", height: "500px", background: `radial-gradient(ellipse,${rgba(brand, .18)} 0%,transparent 58%)`, animation: "glowDrift 9s ease-in-out infinite reverse", zIndex: 1, pointerEvents: "none" }} />
-              {/* Diagonal overlay */}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(125deg,rgba(8,6,20,.9) 0%,rgba(8,6,20,.4) 55%,transparent 100%)", zIndex: 2, pointerEvents: "none" }} />
-              {/* Divider fade between zones */}
-              <div style={{ position: "absolute", bottom: "38%", left: 0, right: 0, height: "120px", background: "linear-gradient(to top,rgba(8,6,20,.6) 0%,transparent 100%)", zIndex: 2, pointerEvents: "none" }} />
+              {/* ── Hero gradient background — brand-matched animated aurora ── */}
+              {/* Base dark */}
+              <div style={{ position: "absolute", inset: 0, background: "#06040f", zIndex: 0 }} />
+              {/* Orb 1 — large brand blob, top-left, slow drift */}
+              <div style={{ position: "absolute", top: "-20%", left: "-15%", width: "80vw", height: "80vh", background: `radial-gradient(ellipse, ${rgba(brand,.55)} 0%, ${rgba(brand,.18)} 35%, transparent 65%)`, animation: "heroOrb1 14s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
+              {/* Orb 2 — brand blob, bottom-right, medium */}
+              <div style={{ position: "absolute", bottom: "-15%", right: "-10%", width: "65vw", height: "70vh", background: `radial-gradient(ellipse, ${rgba(brand,.45)} 0%, ${rgba(brand,.12)} 40%, transparent 65%)`, animation: "heroOrb2 10s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
+              {/* Orb 3 — center glow, gentle pulse */}
+              <div style={{ position: "absolute", top: "20%", left: "30%", width: "55vw", height: "55vh", background: `radial-gradient(ellipse, ${rgba(brand,.25)} 0%, transparent 60%)`, animation: "heroOrb3 7s ease-in-out infinite", zIndex: 1, pointerEvents: "none" }} />
+              {/* Dark vignette on edges only — keeps orbs visible in centre */}
+              <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 90% 90% at 50% 45%, transparent 45%, rgba(4,3,10,.65) 100%)", zIndex: 2, pointerEvents: "none" }} />
+              {/* Left text-area overlay — only darkens left 35% for readability */}
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(4,3,12,.72) 0%, rgba(4,3,12,.3) 35%, transparent 60%)", zIndex: 2, pointerEvents: "none" }} />
+              {/* Bottom fade */}
+              <div style={{ position: "absolute", bottom: "38%", left: 0, right: 0, height: "120px", background: "linear-gradient(to top, rgba(4,3,12,.55) 0%, transparent 100%)", zIndex: 2, pointerEvents: "none" }} />
 
               {/* ── ZONE 1: Headline content (flex-grow fills top 60%) ── */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 4, padding: "72px max(32px,calc(50vw - 620px)) 0" }}>
@@ -675,10 +780,13 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {/* CTA row */}
                 <div className="reveal reveal-d3" style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                   <button className="t2-btn-primary" onClick={() => scrollTo(1)}>
-                    View {total} Findings
+                    View Insights
                     <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
                   </button>
-                  <button className="t2-btn-ghost">Download Report</button>
+                  <button className="t2-btn-ghost">
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Download Report
+                  </button>
                   {/* Meta pills */}
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "4px" }}>
                     {[
@@ -724,8 +832,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* Scroll hint */}
                 <div className="reveal reveal-d2" style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "18px" }}>
-                  <div style={{ width: "16px", height: "1px", background: "rgba(220,215,255,.12)" }} />
-                  <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.18)", letterSpacing: ".12em", textTransform: "uppercase" }}>
+                  <div style={{ width: "16px", height: "1px", background: "rgba(220,215,255,.25)" }} />
+                  <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.35)", letterSpacing: ".12em", textTransform: "uppercase" }}>
                     Scroll to explore {total} findings
                   </span>
                 </div>
@@ -770,13 +878,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       </div>
                     ))}
                   </div>
-                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                   <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
-                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                    {([
+                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                        {label}
                       </a>
                     ))}
                   </div>
@@ -823,13 +935,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     ))}
                   </div>
                 </div>
-                <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                 <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
-                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                    {([
+                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                        {label}
                       </a>
                     ))}
                   </div>
@@ -878,11 +994,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.15)", fontStyle:"italic", marginTop:"16px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                 <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
-                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                    {([
+                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                        {label}
                       </a>
                     ))}
                   </div>
@@ -929,13 +1049,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.45)", lineHeight:1.65 }}>{b}</p>
                     </div>
                   ))}
-                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                   <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
-                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                    {([
+                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                        {label}
                       </a>
                     ))}
                   </div>
@@ -987,13 +1111,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.5)", lineHeight:1.65 }}>{b}</p>
                       </div>
                     ))}
-                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                     <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
-                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                    {([
+                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                        {label}
                       </a>
                     ))}
                   </div>
@@ -1054,13 +1182,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.45)", lineHeight:1.4, maxWidth:"180px", marginTop:"4px" }}>{p.statLabel}</p>
                     </div>
                     <div style={{ flex:1, height:"1px", background:`linear-gradient(90deg,${rgba(brand,.3)},transparent)` }} />
-                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.18)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives</p>
+                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives</p>
                     <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                      <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))", display:"inline-block", transition:"all 0.2s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,1), rgba(75,29,110,1), rgba(155,27,42,1))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.7), rgba(75,29,110,0.7), rgba(155,27,42,0.7))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(220,215,255,0.5)"; }}>
-                        <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"#080614" }}>{label}</span>
+                    {([
+                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                      <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                        {label}
                       </a>
                     ))}
                   </div>
@@ -1070,95 +1202,159 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             </section>
             ); })()}
 
-            {/* ══ T2 · END ══════════════════════════════════════════════════════════
-                Download-CTA section pattern from Shoptalk
+            {/* ══ T2 · END — CLOSING MANIFESTO ══════════════════════════════════════
+                Full-viewport cinematic closer. Three zones stacked vertically:
+                1. Top: eyebrow label + large provocative statement
+                2. Middle: thin divider with 3 study attribution pills
+                3. Bottom: two horizontal invitation cards side by side
             ════════════════════════════════════════════════════════════════════════ */}
             <section
               ref={el => { sectionRefs.current[total + 1] = el; }}
               style={{
-                height: "100vh", scrollSnapAlign: "start",
+                height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always",
                 display: "flex", flexDirection: "column", justifyContent: "center",
-                padding: `44px max(32px,calc(50vw - 620px)) 0`,
+                padding: `0 max(32px,calc(50vw - 620px))`,
                 position: "relative", overflow: "hidden",
                 background: "#080614",
               }}
             >
-              {/* Centered glow */}
-              <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 65% 55% at 50% 50%,rgba(109,40,217,.13) 0%,transparent 65%)", pointerEvents: "none" }} />
-              <div style={{ position: "absolute", bottom: "5%", right: "5%", width: "480px", height: "380px", background: `radial-gradient(ellipse,${rgba(brand,.09)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+              {/* Ambient glows */}
+              <div style={{ position: "absolute", top: "0%", left: "-10%", width: "70vw", height: "60vh", background: `radial-gradient(ellipse,${rgba(brand,.1)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", bottom: "0%", right: "-5%", width: "50vw", height: "50vh", background: "radial-gradient(ellipse,rgba(109,40,217,.1) 0%,transparent 60%)", pointerEvents: "none" }} />
+              {/* Fine grid texture */}
+              <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
 
-              {/* Two-col layout */}
-              <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "48px", alignItems: "center", width: "100%" }}>
+              <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "0" }}>
 
-                {/* LEFT */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                  <p className="t2-section-label reveal" style={{ marginBottom: "0" }}>End of Report</p>
-                  <div className="reveal reveal-d1">
-                    <h2 style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(2.4rem,4vw,5rem)", fontWeight: 700, color: "#f0eeff", lineHeight: 0.95, letterSpacing: "-0.01em", textTransform: "uppercase", margin: 0 }}>
-                      Next<br /><span style={{ WebkitTextStroke: "1.5px rgba(240,238,255,0.2)", color: "transparent" }}>Steps.</span>
-                    </h2>
+                {/* ── ZONE 1: Statement ── */}
+                <div className="reveal" style={{ marginBottom: "36px" }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
+                    <div style={{ width: "20px", height: "1px", background: rgba(brand,.6) }} />
+                    <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>SSEB 2025 · Closing Thoughts</span>
                   </div>
-                  <div style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand,.5)}, rgba(109,40,217,.25), transparent)`, maxWidth: "320px" }} />
-                  <p className="reveal reveal-d2" style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: ".88rem", color: "rgba(220,215,255,.28)", lineHeight: 1.82, maxWidth: "380px", margin: 0 }}>
-                    The full SSEB report includes the complete maturity framework, retailer benchmarking, and a prioritized roadmap built for your scale.
-                  </p>
-                  <button onClick={() => scrollTo(0)} style={{ alignSelf: "flex-start", padding: "0", background: "none", border: "none", color: "rgba(220,215,255,.15)", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", letterSpacing: ".1em", textTransform: "uppercase" }}>↑ Back to top</button>
+                  <h2 style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 700, lineHeight: 1.0, letterSpacing: "-.01em", textTransform: "uppercase", color: "#f0eeff", margin: 0, maxWidth: "720px" }}>
+                    The gap between{" "}
+                    <span style={{ color: brandLight }}>knowing</span>
+                    {" "}and{" "}
+                    <span style={{ WebkitTextStroke: `1.5px ${rgba(brand,.6)}`, color: "transparent" }}>acting</span>
+                    {" "}is where{" "}
+                    <span style={{ color: brandLight }}>{grocer.shortName}</span>
+                    {" "}wins or loses.
+                  </h2>
                 </div>
 
-                {/* RIGHT — action card */}
-                <div className="reveal reveal-right reveal-d1">
-                  <div style={{ borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(109,40,217,0.25)", background: "#13102a", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}>
-                    <div style={{ height: "3px", background: "linear-gradient(90deg, #1B4F9B, #4B1D6E, #9B1B2A)" }} />
-                    <div style={{ padding: "36px 36px 32px" }}>
-                      <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(220,215,255,0.22)", marginBottom: "20px" }}>What happens next</div>
-                      {[
-                        { n: "01", title: "Access the Full Report", desc: "Get the complete benchmark data, maturity framework, and retailer comparisons." },
-                        { n: "02", title: "30-Min Walkthrough", desc: "A Diebold Nixdorf consultant walks you through findings relevant to your operations." },
-                      ].map((step) => (
-                        <div key={step.n} style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
-                          <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>{step.n}</span>
-                          </div>
-                          <div>
-                            <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "12px", fontWeight: 700, color: "rgba(240,238,255,0.75)", marginBottom: "4px" }}>{step.title}</div>
-                            <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,0.3)", lineHeight: 1.6 }}>{step.desc}</div>
-                          </div>
-                        </div>
-                      ))}
-                      <div style={{ height: "1px", background: "rgba(109,40,217,0.2)", marginBottom: "24px" }} />
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E, #9B1B2A)", border: "none", color: "#fff", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(27,79,155,0.35)" }}>
-                          Access Full Report
-                        </button>
-                        <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "transparent", border: "1px solid rgba(109,40,217,0.3)", color: "rgba(220,215,255,0.45)", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em" }}>
-                          Schedule a Call with a Consultant
-                        </button>
+                {/* ── ZONE 2: Divider + attribution pills ── */}
+                <div className="reveal reveal-d1" style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "36px" }}>
+                  <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,${rgba(brand,.4)},rgba(109,40,217,.2),transparent)` }} />
+                  {[
+                    { v: "131", l: "Retail Executives" },
+                    { v: "2,533", l: "Shoppers Surveyed" },
+                    { v: "10", l: "Retailers Benchmarked" },
+                  ].map((chip) => (
+                    <div key={chip.v} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.06), border: `1px solid ${rgba(brand,.18)}`, flexShrink: 0 }}>
+                      <span style={{ fontFamily: "var(--font-heading),sans-serif", fontSize: "13px", fontWeight: 800, color: brandLight, lineHeight: 1 }}>{chip.v}</span>
+                      <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.35)", letterSpacing: ".05em" }}>{chip.l}</span>
+                    </div>
+                  ))}
+                  <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg,transparent,rgba(109,40,217,.1))" }} />
+                </div>
+
+                {/* ── ZONE 3: Two invitation cards ── */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+
+                  {/* Card A — Full Report (primary, gradient fill) */}
+                  <div className="reveal reveal-d2" style={{ borderRadius: "16px", overflow: "hidden", background: "linear-gradient(135deg,#1B4F9B,#4B1D6E 55%,#9B1B2A)", boxShadow: `0 8px 40px rgba(27,79,155,.35), 0 0 0 1px rgba(255,255,255,.06)`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative" }}>
+                    {/* Noise/gloss overlay */}
+                    <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,255,255,.07) 0%,transparent 60%)", pointerEvents: "none" }} />
+                    <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+                      {/* Icon */}
+                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,.12)", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)" }}>
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.9)" strokeWidth={1.8}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
                       </div>
+                      <div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", marginBottom: "6px" }}>Full Report</div>
+                        <div style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700, color: "#fff", lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-.01em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(255,255,255,.55)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                      </div>
+                      <div style={{ flex: 1 }} />
+                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)", color: "#fff", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", backdropFilter: "blur(8px)", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.25)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.15)"; }}>
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Download Report →
+                      </button>
                     </div>
                   </div>
+
+                  {/* Card B — Schedule Call (secondary, dark glass) */}
+                  <div className="reveal reveal-d2" style={{ borderRadius: "16px", background: "#13102a", border: `1px solid ${rgba(brand,.22)}`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                    {/* Subtle inner glow */}
+                    <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "60%", height: "60%", background: `radial-gradient(ellipse,${rgba(brand,.12)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+                    <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+                      {/* Icon */}
+                      <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.12), border: `1px solid ${rgba(brand,.28)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brandLight} strokeWidth={1.8}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.28)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                        <div style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700, color: "#f0eeff", lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-.01em", marginBottom: "8px" }}>30-Min Strategy Call</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.38)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                      </div>
+                      <div style={{ flex: 1 }} />
+                      <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.38)}`, color: brandLight, cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = rgba(brand,.12); (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.6); }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.38); }}>
+                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        Schedule a Call →
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Back to top */}
+                <div className="reveal reveal-d3" style={{ marginTop: "24px", display: "flex", justifyContent: "center" }}>
+                  <button onClick={() => scrollTo(0)} style={{ padding: "7px 16px", borderRadius: "7px", background: "none", border: "1px solid rgba(220,215,255,0.2)", color: "rgba(220,215,255,0.5)", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", transition: "all 0.15s" }}
+                    onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "rgba(220,215,255,0.07)"; b.style.color = "rgba(220,215,255,0.85)"; }}
+                    onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "none"; b.style.color = "rgba(220,215,255,0.5)"; }}>
+                    ↑ Back to Top
+                  </button>
                 </div>
               </div>
 
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px max(32px,calc(50vw - 620px))", borderTop: "1px solid rgba(109,40,217,.1)", display: "flex", justifyContent: "space-between" }}>
-                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.35 }} />
-                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.07)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.05)" }}>© 2025 Incisiv</span>
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px max(32px,calc(50vw - 620px))", borderTop: "1px solid rgba(109,40,217,.15)", display: "flex", justifyContent: "space-between" }}>
+                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
+                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.35)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
+                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.25)" }}>© 2025 Incisiv</span>
               </div>
             </section>
           </>
         )}
 
 
-        {!isT2 && (<>
+        {theme === "theme1" && (<>
 
         {/* ══ HERO — Command Center ════════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[0] = el; }}
-          style={{ height:"100vh", scrollSnapAlign:"start", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column", background:"#080c12" }}
+          style={{ height:"100vh", scrollSnapAlign:"start", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column", background:"#050810" }}
         >
-          {/* Ambient glow top-left */}
-          <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 60% 70% at 0% 0%,${rgba(brand,0.13)} 0%,transparent 55%)`, pointerEvents:"none" }} />
-          <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 40% 40% at 100% 100%,${rgba(brand,0.06)} 0%,transparent 55%)`, pointerEvents:"none" }} />
+          {/* ── Hero gradient background — brand-matched animated aurora ── */}
+          <div style={{ position:"absolute", inset:0, background:"#050810", zIndex:0 }} />
+          {/* Orb 1 — large brand blob, top-left, slow drift */}
+          <div style={{ position:"absolute", top:"-20%", left:"-15%", width:"80vw", height:"80vh", background:`radial-gradient(ellipse, ${rgba(brand,.55)} 0%, ${rgba(brand,.18)} 35%, transparent 65%)`, animation:"heroOrb1 14s ease-in-out infinite", zIndex:1, pointerEvents:"none" }} />
+          {/* Orb 2 — brand blob, bottom-right, medium */}
+          <div style={{ position:"absolute", bottom:"-15%", right:"-10%", width:"65vw", height:"70vh", background:`radial-gradient(ellipse, ${rgba(brand,.45)} 0%, ${rgba(brand,.12)} 40%, transparent 65%)`, animation:"heroOrb2 10s ease-in-out infinite", zIndex:1, pointerEvents:"none" }} />
+          {/* Orb 3 — center glow, gentle pulse */}
+          <div style={{ position:"absolute", top:"20%", left:"30%", width:"55vw", height:"55vh", background:`radial-gradient(ellipse, ${rgba(brand,.25)} 0%, transparent 60%)`, animation:"heroOrb3 7s ease-in-out infinite", zIndex:1, pointerEvents:"none" }} />
+          {/* Edge vignette */}
+          <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse 90% 90% at 50% 45%, transparent 45%, rgba(4,6,14,.65) 100%)", zIndex:2, pointerEvents:"none" }} />
+          {/* Left text-area overlay */}
+          <div style={{ position:"absolute", inset:0, background:"linear-gradient(90deg, rgba(4,6,14,.72) 0%, rgba(4,6,14,.3) 35%, transparent 60%)", zIndex:2, pointerEvents:"none" }} />
 
           {/* Top bar — eyebrow */}
           <div className="ru" style={{ animationDelay:"0.02s", padding:"28px 8vw 0", display:"flex", justifyContent:"space-between", alignItems:"center", position:"relative", zIndex:2 }}>
@@ -1172,9 +1368,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           {/* Main content — fills remaining height */}
           <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", padding:"0 8vw", position:"relative", zIndex:2, gap:"0" }}>
 
-            {/* Grocer name — large accent */}
-            <div className="ru" style={{ animationDelay:"0.06s", fontSize:"clamp(0.7rem,1vw,0.85rem)", fontWeight:700, letterSpacing:"0.22em", textTransform:"uppercase", color:rgba(brand,0.5), marginBottom:"16px" }}>
-              {grocer.shortName.toUpperCase()}
+            {/* Grocer logo + name */}
+            <div className="ru" style={{ animationDelay:"0.06s", marginBottom:"20px" }}>
+              <img src={grocer.logoUrl} alt={grocer.shortName} style={{ height:`${grocer.logoHeight ?? 36}px`, width:"auto", maxWidth:"200px", objectFit:"contain", display:"block", filter: (!grocer.logoHasBg) ? "brightness(0) invert(1)" : "none", opacity: grocer.logoHasBg ? 1 : 0.9 }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
 
             {/* Main headline — full width, very large */}
@@ -1202,8 +1398,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <p style={{ fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.32)", lineHeight:1.75, maxWidth:"480px", margin:0 }}>
                 {grocer.heroSubheadline}
               </p>
-              <button onClick={() => scrollTo(1)} style={{ flexShrink:0, padding:"14px 32px", background:brand, border:"none", color:"#fff", cursor:"pointer", fontSize:"11px", fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:`0 0 32px ${rgba(brand,0.45)}` }}>
-                View {total} Findings →
+              <button onClick={() => scrollTo(1)} style={{ flexShrink:0, padding:"14px 32px", borderRadius:"7px", background:brand, border:"none", color:"#fff", cursor:"pointer", fontSize:"11px", fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:`0 0 32px ${rgba(brand,0.45)}` }}>
+                View Insights →
               </button>
             </div>
           </div>
@@ -1211,8 +1407,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           {/* Bottom rule */}
           <div style={{ height:"1px", background:"rgba(255,255,255,0.04)", position:"relative", zIndex:2 }} />
           <div style={{ padding:"12px 8vw", display:"flex", justifyContent:"space-between", position:"relative", zIndex:2 }}>
-            <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.35 }} />
-            <span style={{ fontSize:"9px", color:"rgba(255,255,255,0.08)" }}>131 retail executives · 2,533 shoppers</span>
+            <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
+            <span style={{ fontSize:"9px", color:"rgba(255,255,255,0.35)" }}>131 retail executives · 2,533 shoppers</span>
           </div>
 
         </section>
@@ -1230,17 +1426,20 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"48px":"8vw"} 56px ${isA?"8vw":"48px"}`, borderRight:"none", borderLeft:"none", position:"relative", zIndex:1, gap:"20px" }}>
               <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
                 <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>{p.title}</span>
-                <span style={{ color:"rgba(255,255,255,0.2)", fontSize:"11px" }}>/ {total}</span>
               </div>
               <WordFadeTitle text={p.hook} style={{ fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }} />
               <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
               <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.5)", lineHeight:1.9, margin:0 }}>{p.body}</p>
               <div className="rfi" style={{ animationDelay:"0.2s", display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                {[["Access Full Report","#"], ["Schedule a Call","#"]].map(([label, href]) => (
-                  <a key={label} href={href} style={{ fontSize:"9px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(255,255,255,0.5)", textDecoration:"none", padding:"1px", borderRadius:"20px", background:"linear-gradient(135deg, rgba(27,79,155,0.6), rgba(75,29,110,0.6), rgba(155,27,42,0.6))", display:"inline-block", transition:"all 0.2s" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.9), rgba(75,29,110,0.9), rgba(155,27,42,0.9))"; (e.currentTarget as HTMLAnchorElement).style.color="#fff"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="linear-gradient(135deg, rgba(27,79,155,0.6), rgba(75,29,110,0.6), rgba(155,27,42,0.6))"; (e.currentTarget as HTMLAnchorElement).style.color="rgba(255,255,255,0.5)"; }}>
-                    <span style={{ display:"block", padding:"4px 12px", borderRadius:"19px", background:"rgba(8,12,18,0.95)" }}>{label}</span>
+                {([
+                  { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
+                  { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
+                ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
+                  <a key={label} href={href} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(255,255,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(255,255,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(255,255,255,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(255,255,255,0.38)"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(255,255,255,0.2)"; }}>
+                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
+                    {label}
                   </a>
                 ))}
               </div>
@@ -1279,16 +1478,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <p style={{ fontSize:"clamp(1rem,1.15vw,1.15rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.4, maxWidth:"160px", margin:0 }}>{p.statLabel}</p>
               </div>
               <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
-              {/* Bullets in a box — running border glow */}
-              <div className="ru bullet-box-wrap" style={{ animationDelay:"0.18s", "--bb-color":rgba(brand,0.9) } as React.CSSProperties}>
-                <div style={{ display:"flex", flexDirection:"column", gap:"0", borderRadius:"7px", overflow:"hidden", background:rgba(brand,0.05), position:"relative", zIndex:1 }}>
-                  {p.bullets.map((b,bi) => (
-                    <div key={bi} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px" }}>
-                      <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight, flexShrink:0, marginTop:"7px" }} />
-                      <p style={{ fontSize:"clamp(0.9rem,1.05vw,1rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.6, margin:0 }}>{b}</p>
-                    </div>
-                  ))}
-                </div>
+              {/* Bullets in a box — animated border + scroll-reveal stagger */}
+              <div className="t1-bullet-box" style={{ display:"flex", flexDirection:"column", gap:"0", "--bb-color-bright":rgba(brand,0.9), "--bb-grad-start":rgba(brand,0.18) } as React.CSSProperties}>
+                <div className="t1-bullet-grad" />
+                {p.bullets.map((b,bi) => (
+                  <div key={bi} className={`t1-reveal t1-reveal-d${(bi + 1) as 1|2|3}`} style={{ display:"flex", gap:"14px", alignItems:"flex-start", padding:"14px 18px" }}>
+                    <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight, flexShrink:0, marginTop:"7px" }} />
+                    <p style={{ fontSize:"clamp(0.9rem,1.05vw,1rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.6, margin:0 }}>{b}</p>
+                  </div>
+                ))}
               </div>
               <p style={{ fontSize:"11px", color:"rgba(255,255,255,0.2)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
             </div>
@@ -1301,67 +1499,120 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             </section>
           );
         })())}
-        {/* ══ END ═══════════════════════════════════════════════════════════════ */}
+        {/* ══ END — CLOSING MANIFESTO ═══════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[total + 1] = el; }}
-          style={{ height: "100vh", scrollSnapAlign: "start", display: "grid", gridTemplateColumns: "1fr 1fr", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#080c12" }}
+          style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: `0 8vw`, paddingTop: "52px", position: "relative", overflow: "hidden", background: "#080c12" }}
         >
-          <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 50% 70% at 0% 100%, ${rgba(brand, 0.1)} 0%, transparent 55%)`, pointerEvents: "none" }} />
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 40% 50% at 100% 0%, rgba(27,79,155,0.08) 0%, transparent 55%)", pointerEvents: "none" }} />
+          {/* Ambient glows */}
+          <div style={{ position: "absolute", top: "0%", left: "-10%", width: "60vw", height: "60vh", background: `radial-gradient(ellipse,${rgba(brand,.09)} 0%,transparent 58%)`, pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: "0%", right: "-5%", width: "50vw", height: "50vh", background: "radial-gradient(ellipse,rgba(27,79,155,.08) 0%,transparent 60%)", pointerEvents: "none" }} />
+          {/* Fine grid texture */}
+          <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
 
-          {/* LEFT */}
-          <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 48px 0 8vw", position: "relative", zIndex: 1, gap: "24px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ width: "24px", height: "1px", background: rgba(brand, 0.5) }} />
-              <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: rgba(brand, 0.6) }}>End of Report</span>
-            </div>
-            <div>
-              <h2 style={{ fontSize: "clamp(2.4rem,4vw,5rem)", fontWeight: 900, color: "#fff", lineHeight: 0.95, letterSpacing: "-0.04em", margin: 0 }}>Next<br /><span style={{ WebkitTextStroke: "1.5px rgba(255,255,255,0.2)", color: "transparent" }}>Steps.</span></h2>
-            </div>
-            <div style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.4)}, transparent)`, maxWidth: "320px" }} />
-            <p style={{ fontSize: "0.88rem", color: "rgba(255,255,255,0.28)", lineHeight: 1.8, maxWidth: "360px", margin: 0 }}>
-              The full SSEB report includes the complete maturity framework, retailer benchmarking, and a prioritized roadmap built for your scale.
-            </p>
-            <button onClick={() => scrollTo(0)} style={{ alignSelf: "flex-start", padding: "0", background: "none", border: "none", color: "rgba(255,255,255,0.15)", cursor: "pointer", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase" }}>↑ Back to top</button>
-          </div>
+          <div className="ru" style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "0" }}>
 
-          {/* RIGHT — action card */}
-          <div className="ru" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw 0 48px", position: "relative", zIndex: 1 }}>
-            <div style={{ borderRadius: "20px", overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(20px)" }}>
-              <div style={{ height: "3px", background: "linear-gradient(90deg, #1B4F9B, #4B1D6E, #9B1B2A)" }} />
-              <div style={{ padding: "36px 36px 32px" }}>
-                <div style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "20px" }}>What happens next</div>
-                {[
-                  { n: "01", title: "Access the Full Report", desc: "Get the complete benchmark data, maturity framework, and retailer comparisons." },
-                  { n: "02", title: "30-Min Walkthrough", desc: "A Diebold Nixdorf consultant walks you through findings relevant to your operations." },
-                ].map((step) => (
-                  <div key={step.n} style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
-                    <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: "9px", fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>{step.n}</span>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.75)", marginBottom: "4px" }}>{step.title}</div>
-                      <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.28)", lineHeight: 1.6 }}>{step.desc}</div>
-                    </div>
+            {/* ── ZONE 1: Statement ── */}
+            <div style={{ marginBottom: "36px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
+                <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>SSEB 2025 · Closing Thoughts</span>
+              </div>
+              <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#fff", margin: 0, maxWidth: "720px" }}>
+                The gap between{" "}
+                <span style={{ color: brandLight }}>knowing</span>
+                {" "}and{" "}
+                <span style={{ WebkitTextStroke: `1.5px ${rgba(brand,.5)}`, color: "transparent" }}>acting</span>
+                {" "}is where{" "}
+                <span style={{ color: brandLight }}>{grocer.shortName}</span>
+                {" "}wins or loses.
+              </h2>
+            </div>
+
+            {/* ── ZONE 2: Divider + attribution pills ── */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
+              <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,${rgba(brand,.4)},rgba(27,79,155,.2),transparent)` }} />
+              {[
+                { v: "131", l: "Retail Executives" },
+                { v: "2,533", l: "Shoppers Surveyed" },
+                { v: "10", l: "Retailers Benchmarked" },
+              ].map((chip) => (
+                <div key={chip.v} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.14)}`, flexShrink: 0 }}>
+                  <span style={{ fontSize: "13px", fontWeight: 900, color: brandLight, lineHeight: 1, letterSpacing: "-.04em" }}>{chip.v}</span>
+                  <span style={{ fontSize: "9px", color: "rgba(255,255,255,.3)", letterSpacing: ".04em" }}>{chip.l}</span>
+                </div>
+              ))}
+              <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg,transparent,rgba(27,79,155,.08))" }} />
+            </div>
+
+            {/* ── ZONE 3: Two invitation cards ── */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+
+              {/* Card A — Full Report (gradient fill) */}
+              <div style={{ borderRadius: "16px", overflow: "hidden", background: "linear-gradient(135deg,#1B4F9B,#4B1D6E 55%,#9B1B2A)", boxShadow: "0 8px 40px rgba(27,79,155,.3), 0 0 0 1px rgba(255,255,255,.05)", padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative" }}>
+                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 20% 20%,rgba(255,255,255,.07) 0%,transparent 60%)", pointerEvents: "none" }} />
+                <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+                  <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.9)" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
                   </div>
-                ))}
-                <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "24px" }} />
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "linear-gradient(135deg, #1B4F9B, #4B1D6E, #9B1B2A)", border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(27,79,155,0.3)" }}>
-                    Access Full Report
-                  </button>
-                  <button style={{ width: "100%", padding: "13px 24px", borderRadius: "10px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)", cursor: "pointer", fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em" }}>
-                    Schedule a Call with a Consultant
+                  <div>
+                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", marginBottom: "6px" }}>Full Report</div>
+                    <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.5)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                  </div>
+                  <div style={{ flex: 1 }} />
+                  <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)", color: "#fff", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.25)"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,.15)"; }}>
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Download Report →
                   </button>
                 </div>
               </div>
+
+              {/* Card B — Schedule Call (dark glass) */}
+              <div style={{ borderRadius: "16px", background: "rgba(255,255,255,.025)", border: `1px solid ${rgba(brand,.2)}`, backdropFilter: "blur(20px)", padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "60%", height: "60%", background: `radial-gradient(ellipse,${rgba(brand,.1)} 0%,transparent 60%)`, pointerEvents: "none" }} />
+                <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: "12px", height: "100%" }}>
+                  <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: rgba(brand,.1), border: `1px solid ${rgba(brand,.25)}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brandLight} strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.22)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                    <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>30-Min Strategy Call</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.3)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                  </div>
+                  <div style={{ flex: 1 }} />
+                  <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.35)}`, color: brandLight, cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = rgba(brand,.1); (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.55); }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.borderColor = rgba(brand,.35); }}>
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    Schedule a Call →
+                  </button>
+                </div>
+              </div>
+
             </div>
+
+            {/* Back to top */}
+            <div style={{ marginTop: "24px", display: "flex", justifyContent: "center" }}>
+              <button onClick={() => scrollTo(0)} style={{ padding: "7px 16px", borderRadius: "7px", background: "none", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: "10px", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", transition: "all 0.15s" }}
+                onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "rgba(255,255,255,0.07)"; b.style.color = "rgba(255,255,255,0.85)"; }}
+                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "none"; b.style.color = "rgba(255,255,255,0.5)"; }}>
+                ↑ Back to Top
+              </button>
+            </div>
+
           </div>
 
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
-            <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.35 }} />
-            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.08)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.06)" }}>© 2025 Incisiv</span>
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
+            <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
+            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.35)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
+            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.25)" }}>© 2025 Incisiv</span>
           </div>
         </section>
 

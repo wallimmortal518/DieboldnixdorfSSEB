@@ -13,6 +13,9 @@ export interface GrocerData {
   id: string;
   name: string;
   shortName: string;
+  logoUrl: string;
+  logoHasBg?: boolean; // true if logo has a baked-in background (no invert, use white pill)
+  logoHeight?: number; // explicit height in px for hero display (default 36)
   customerTerm: string;
   tagline: string;
   description: string;
@@ -31,6 +34,8 @@ export const GROCERS: GrocerData[] = [
   // ─── 1. WALMART ────────────────────────────────────────────────────────────
   {
     id: "walmart",
+    logoUrl: "/logos/walmart.svg",
+    logoHeight: 32,
     name: "Walmart Inc.",
     shortName: "Walmart",
     customerTerm: "customers",
@@ -137,6 +142,9 @@ export const GROCERS: GrocerData[] = [
   // ─── 2. KROGER ─────────────────────────────────────────────────────────────
   {
     id: "kroger",
+    logoUrl: "/logos/kroger.png",
+    logoHasBg: true,
+    logoHeight: 44,
     name: "The Kroger Co.",
     shortName: "Kroger",
     customerTerm: "customers",
@@ -243,6 +251,8 @@ export const GROCERS: GrocerData[] = [
   // ─── 3. COSTCO ─────────────────────────────────────────────────────────────
   {
     id: "costco",
+    logoUrl: "/logos/costco.png",
+    logoHeight: 28,
     name: "Costco Wholesale Corporation",
     shortName: "Costco",
     customerTerm: "members",
@@ -349,6 +359,8 @@ export const GROCERS: GrocerData[] = [
   // ─── 4. ALBERTSONS ─────────────────────────────────────────────────────────
   {
     id: "albertsons",
+    logoUrl: "/logos/albertsons.png",
+    logoHeight: 24,
     name: "Albertsons Companies",
     shortName: "Albertsons",
     customerTerm: "customers",
@@ -455,6 +467,9 @@ export const GROCERS: GrocerData[] = [
   // ─── 5. ALDI ───────────────────────────────────────────────────────────────
   {
     id: "aldi",
+    logoUrl: "/logos/ALDI.png",
+    logoHasBg: true,
+    logoHeight: 52,
     name: "ALDI",
     shortName: "ALDI",
     customerTerm: "customers",
@@ -561,6 +576,8 @@ export const GROCERS: GrocerData[] = [
   // ─── 6. AMAZON / WHOLE FOODS ───────────────────────────────────────────────
   {
     id: "amazon-whole-foods",
+    logoUrl: "/logos/whole-foods.webp",
+    logoHeight: 28,
     name: "Amazon / Whole Foods Market",
     shortName: "Whole Foods",
     customerTerm: "customers",
@@ -667,6 +684,8 @@ export const GROCERS: GrocerData[] = [
   // ─── 7. PUBLIX ─────────────────────────────────────────────────────────────
   {
     id: "publix",
+    logoUrl: "/logos/publix.png",
+    logoHeight: 26,
     name: "Publix Super Markets",
     shortName: "Publix",
     customerTerm: "customers",
@@ -773,6 +792,9 @@ export const GROCERS: GrocerData[] = [
   // ─── 8. TARGET ─────────────────────────────────────────────────────────────
   {
     id: "target",
+    logoUrl: "/logos/Target.png",
+    logoHasBg: true,
+    logoHeight: 28,
     name: "Target Corporation",
     shortName: "Target",
     customerTerm: "guests",
@@ -879,6 +901,9 @@ export const GROCERS: GrocerData[] = [
   // ─── 9. H-E-B ──────────────────────────────────────────────────────────────
   {
     id: "heb",
+    logoUrl: "/logos/HEB.png",
+    logoHasBg: true,
+    logoHeight: 34,
     name: "H-E-B",
     shortName: "H-E-B",
     customerTerm: "customers",
@@ -985,6 +1010,8 @@ export const GROCERS: GrocerData[] = [
   // ─── 10. MEIJER ────────────────────────────────────────────────────────────
   {
     id: "meijer",
+    logoUrl: "/logos/Meijer.png",
+    logoHeight: 36,
     name: "Meijer",
     shortName: "Meijer",
     customerTerm: "customers",
