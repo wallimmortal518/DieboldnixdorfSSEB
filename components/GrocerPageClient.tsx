@@ -345,27 +345,34 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
         /* ── Mobile responsive ── */
         @media (max-width: 768px) {
-          /* Nav — shrink buttons, hide expanding labels */
+          /* Nav — shrink buttons, hide labels */
           .nav-pill-item { width: 28px !important; height: 28px !important; padding: 0 4px !important; }
           .nav-label-expand { display: none !important; }
           /* Section grids stack */
           .section-two-col { grid-template-columns: 1fr !important; }
           .section-two-col-rev { grid-template-columns: 1fr !important; }
-          /* Hero stats row wraps */
-          .hero-stats-row { flex-wrap: wrap !important; gap: 20px !important; }
-          .hero-stat-item { padding-right: 24px !important; margin-right: 24px !important; min-width: 100px; }
-          /* Hero bottom row stacks */
+          /* Hero */
+          .hero-stats-row { flex-wrap: wrap !important; gap: 16px !important; }
+          .hero-stat-item { padding-right: 20px !important; margin-right: 20px !important; }
           .hero-bottom-row { flex-direction: column !important; align-items: flex-start !important; gap: 20px !important; }
-          /* Hero padding tighter */
-          .hero-content { padding: 0 6vw !important; }
+          .hero-content { padding: 0 5vw !important; }
+          /* Attribution pills wrap */
+          .attr-pills-row { flex-wrap: wrap !important; gap: 10px !important; }
+          .attr-pill { flex-shrink: 1 !important; }
+          /* CTA cards */
+          .cta-cards-grid { grid-template-columns: 1fr !important; }
+          /* Finding columns: normalize padding when stacked */
+          .finding-text-col { padding: 40px 5vw 20px !important; }
+          .finding-stat-col { padding: 20px 5vw 40px !important; }
+          /* Dock pill hidden on mobile — not needed with touch */
+          .dock-pill { display: none !important; }
         }
         @media (max-width: 480px) {
-          /* Nav pill — shrink even more, only show numbers */
           .nav-pill-item { width: 24px !important; height: 24px !important; }
-          /* Hero headline smaller */
           .hero-h1 { font-size: clamp(1.5rem, 7vw, 2rem) !important; }
-          /* Stat numbers */
-          .hero-stat-num { font-size: clamp(1.8rem, 8vw, 3rem) !important; }
+          .hero-stat-num { font-size: clamp(1.8rem, 8vw, 2.8rem) !important; }
+          .powered-by-util { display: none !important; }
+          .brand-label-fixed { display: none !important; }
         }
         @media (hover: none) {
           .dock-tooltip { display: none !important; }
@@ -786,7 +793,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               const bg = idx % 2 === 0 ? "#ffffff" : "#f4f4f2";
 
               const textCol = (
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `clamp(24px, 5vw, 56px) ${isA ? "clamp(16px, 4vw, 48px)" : "8vw"} clamp(24px, 5vw, 56px) ${isA ? "8vw" : "clamp(16px, 4vw, 48px)"}`, position: "relative", zIndex: 1, gap: "20px" }}>
+                <div className="finding-text-col" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `clamp(24px, 5vw, 56px) ${isA ? "clamp(16px, 4vw, 48px)" : "8vw"} clamp(24px, 5vw, 56px) ${isA ? "8vw" : "clamp(16px, 4vw, 48px)"}`, position: "relative", zIndex: 1, gap: "20px" }}>
                   <div className="ru" style={{ animationDelay: "0.04s", display: "flex", alignItems: "center", gap: "10px" }}>
                     <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: brand }}>{p.title}</span>
                   </div>
@@ -797,7 +804,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               );
 
               const statCol = (
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `clamp(24px, 5vw, 56px) ${isA ? "8vw" : "clamp(16px, 4vw, 48px)"} clamp(24px, 5vw, 56px) ${isA ? "clamp(16px, 4vw, 48px)" : "8vw"}`, position: "relative", zIndex: 1, gap: "20px" }}>
+                <div className="finding-stat-col" style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `clamp(24px, 5vw, 56px) ${isA ? "8vw" : "clamp(16px, 4vw, 48px)"} clamp(24px, 5vw, 56px) ${isA ? "clamp(16px, 4vw, 48px)" : "8vw"}`, position: "relative", zIndex: 1, gap: "20px" }}>
                   <div className="ru" style={{ animationDelay: "0.1s", display: "flex", alignItems: "center", gap: "24px" }}>
                     {(() => {
                       const vsMatch = p.stat.match(/^(\d+)%\s*vs\.?\s*(\d+)%$/i);
@@ -880,14 +887,14 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* ZONE 2: Divider + attribution pills */}
-                <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
+                <div className="attr-pills-row" style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
                   <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,${rgba(brand,.3)},transparent)` }} />
                   {[
                     { v: "131", l: "Retail Executives" },
                     { v: "2,533", l: "Shoppers Surveyed" },
                     { v: "10", l: "Retailers Benchmarked" },
                   ].map((chip) => (
-                    <div key={chip.v} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.15)}`, flexShrink: 0 }}>
+                    <div key={chip.v} className="attr-pill" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.15)}`, flexShrink: 0 }}>
                       <span style={{ fontSize: "13px", fontWeight: 900, color: brand, lineHeight: 1, letterSpacing: "-.04em" }}>{chip.v}</span>
                       <span style={{ fontSize: "9px", color: "rgba(0,0,0,.4)", letterSpacing: ".04em" }}>{chip.l}</span>
                     </div>
@@ -896,7 +903,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* ZONE 3: Two invitation cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+                <div className="cta-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
 
                   {/* Card A — Full Report */}
                   <div style={{ borderRadius: "16px", background: "#fff", border: `1px solid ${rgba(brand,.18)}`, boxShadow: `0 4px 24px ${rgba(brand,.08)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
@@ -1425,14 +1432,14 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* ── ZONE 2: Divider + attribution pills ── */}
-                <div className="reveal reveal-d1" style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "36px" }}>
+                <div className="reveal reveal-d1 attr-pills-row" style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "36px" }}>
                   <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,${rgba(brand,.4)},rgba(109,40,217,.2),transparent)` }} />
                   {[
                     { v: "131", l: "Retail Executives" },
                     { v: "2,533", l: "Shoppers Surveyed" },
                     { v: "10", l: "Retailers Benchmarked" },
                   ].map((chip) => (
-                    <div key={chip.v} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.06), border: `1px solid ${rgba(brand,.18)}`, flexShrink: 0 }}>
+                    <div key={chip.v} className="attr-pill" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.06), border: `1px solid ${rgba(brand,.18)}`, flexShrink: 0 }}>
                       <span style={{ fontFamily: "var(--font-heading),sans-serif", fontSize: "13px", fontWeight: 800, color: brandLight, lineHeight: 1 }}>{chip.v}</span>
                       <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.35)", letterSpacing: ".05em" }}>{chip.l}</span>
                     </div>
@@ -1441,7 +1448,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* ── ZONE 3: Two invitation cards ── */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+                <div className="cta-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
 
                   {/* Card A — Full Report */}
                   <div className="reveal reveal-d2" style={{ borderRadius: "16px", background: "#13102a", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.12)}`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
@@ -1591,7 +1598,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           const isA = idx % 2 === 0; // Layout A on odd findings (1,3,5), B on even (2,4,6)
 
           const textCol = (
-            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`clamp(24px, 5vw, 56px) ${isA?"clamp(16px, 4vw, 48px)":"8vw"} clamp(24px, 5vw, 56px) ${isA?"8vw":"clamp(16px, 4vw, 48px)"}`, borderRight:"none", borderLeft:"none", position:"relative", zIndex:1, gap:"20px" }}>
+            <div className="finding-text-col" style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`clamp(24px, 5vw, 56px) ${isA?"clamp(16px, 4vw, 48px)":"8vw"} clamp(24px, 5vw, 56px) ${isA?"8vw":"clamp(16px, 4vw, 48px)"}`, borderRight:"none", borderLeft:"none", position:"relative", zIndex:1, gap:"20px" }}>
               <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
                 <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>{p.title}</span>
               </div>
@@ -1602,7 +1609,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           );
 
           const statCol = (
-            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`clamp(24px, 5vw, 56px) ${isA?"8vw":"clamp(16px, 4vw, 48px)"} clamp(24px, 5vw, 56px) ${isA?"clamp(16px, 4vw, 48px)":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
+            <div className="finding-stat-col" style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`clamp(24px, 5vw, 56px) ${isA?"8vw":"clamp(16px, 4vw, 48px)"} clamp(24px, 5vw, 56px) ${isA?"clamp(16px, 4vw, 48px)":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
               {/* Stat + label inline */}
               <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"center", gap:"24px" }}>
                 {(() => {
@@ -1685,14 +1692,14 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             </div>
 
             {/* ── ZONE 2: Divider + attribution pills ── */}
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
+            <div className="attr-pills-row" style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
               <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,${rgba(brand,.4)},rgba(27,79,155,.2),transparent)` }} />
               {[
                 { v: "131", l: "Retail Executives" },
                 { v: "2,533", l: "Shoppers Surveyed" },
                 { v: "10", l: "Retailers Benchmarked" },
               ].map((chip) => (
-                <div key={chip.v} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.14)}`, flexShrink: 0 }}>
+                <div key={chip.v} className="attr-pill" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.14)}`, flexShrink: 0 }}>
                   <span style={{ fontSize: "13px", fontWeight: 900, color: brandLight, lineHeight: 1, letterSpacing: "-.04em" }}>{chip.v}</span>
                   <span style={{ fontSize: "9px", color: "rgba(255,255,255,.3)", letterSpacing: ".04em" }}>{chip.l}</span>
                 </div>
@@ -1701,7 +1708,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             </div>
 
             {/* ── ZONE 3: Two invitation cards ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
+            <div className="cta-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
 
               {/* Card A — Full Report */}
               <div style={{ borderRadius: "16px", background: "rgba(255,255,255,.04)", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.1)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
