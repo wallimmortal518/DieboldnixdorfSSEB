@@ -68,6 +68,8 @@ export default function LoginForm() {
                 border: "1px solid rgba(255,255,255,0.18)",
                 backdropFilter: "blur(8px)",
                 color: "#fff",
+                WebkitTextFillColor: "#fff",
+                caretColor: "#fff",
               }}
               onFocus={(e) => {
                 e.currentTarget.style.border = "1px solid rgba(255,255,255,0.5)";
@@ -104,6 +106,8 @@ export default function LoginForm() {
                 border: "1px solid rgba(255,255,255,0.18)",
                 backdropFilter: "blur(8px)",
                 color: "#fff",
+                WebkitTextFillColor: "#fff",
+                caretColor: "#fff",
               }}
               onFocus={(e) => {
                 e.currentTarget.style.border = "1px solid rgba(255,255,255,0.5)";

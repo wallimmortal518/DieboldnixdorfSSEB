@@ -27,6 +27,16 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Fix Safari autofill overriding text/background color on dark inputs */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(30, 20, 60, 0.95) inset !important;
+    caret-color: #fff !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
   ::selection {
     background-color: var(--color-teal-600);
     color: white;
