@@ -345,11 +345,27 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
         /* ── Mobile responsive ── */
         @media (max-width: 768px) {
-          .nav-pill-item { width: 26px !important; height: 26px !important; }
+          /* Nav — shrink buttons, hide expanding labels */
+          .nav-pill-item { width: 28px !important; height: 28px !important; padding: 0 4px !important; }
+          .nav-label-expand { display: none !important; }
+          /* Section grids stack */
           .section-two-col { grid-template-columns: 1fr !important; }
           .section-two-col-rev { grid-template-columns: 1fr !important; }
-          .finding-section { flex-direction: column !important; height: auto !important; min-height: 100dvh !important; overflow-y: auto !important; scroll-snap-align: start; padding: 80px 20px 40px !important; }
-          .finding-section > * { width: 100% !important; max-width: 100% !important; }
+          /* Hero stats row wraps */
+          .hero-stats-row { flex-wrap: wrap !important; gap: 20px !important; }
+          .hero-stat-item { padding-right: 24px !important; margin-right: 24px !important; min-width: 100px; }
+          /* Hero bottom row stacks */
+          .hero-bottom-row { flex-direction: column !important; align-items: flex-start !important; gap: 20px !important; }
+          /* Hero padding tighter */
+          .hero-content { padding: 0 6vw !important; }
+        }
+        @media (max-width: 480px) {
+          /* Nav pill — shrink even more, only show numbers */
+          .nav-pill-item { width: 24px !important; height: 24px !important; }
+          /* Hero headline smaller */
+          .hero-h1 { font-size: clamp(1.5rem, 7vw, 2rem) !important; }
+          /* Stat numbers */
+          .hero-stat-num { font-size: clamp(1.8rem, 8vw, 3rem) !important; }
         }
         @media (hover: none) {
           .dock-tooltip { display: none !important; }
@@ -488,7 +504,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {p.number}
               </span>
               {/* Label — expands smoothly via grid trick */}
-              <div style={{
+              <div className="nav-label-expand" style={{
                 display: "grid",
                 gridTemplateColumns: isActive ? "1fr" : "0fr",
                 transition: "grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1)",
@@ -729,25 +745,25 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 70% 70% at 30% 50%, rgba(250,250,248,0.82) 0%, rgba(250,250,248,0.45) 55%, transparent 80%)", zIndex: 2, pointerEvents: "none" }} />
 
 
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", position: "relative", zIndex: 2, gap: "0" }}>
+              <div className="hero-content" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", position: "relative", zIndex: 2, gap: "0" }}>
                 <div className="ru" style={{ animationDelay: "0.06s", marginBottom: "20px" }}>
                   <img src={grocer.logoUrl} alt={grocer.shortName} style={{ height: `${grocer.logoHeight ?? 36}px`, width: "auto", maxWidth: "200px", objectFit: "contain", display: "block" }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                 </div>
-                <h1 className="ru" style={{ animationDelay: "0.1s", fontSize: "clamp(1.8rem,2.8vw,3rem)", fontWeight: 900, color: "#111", lineHeight: 1.0, letterSpacing: "-0.04em", maxWidth: "22ch", marginBottom: "32px" }}>
+                <h1 className="ru hero-h1" style={{ animationDelay: "0.1s", fontSize: "clamp(1.8rem,2.8vw,3rem)", fontWeight: 900, color: "#111", lineHeight: 1.0, letterSpacing: "-0.04em", maxWidth: "22ch", marginBottom: "32px" }}>
                   {grocer.heroHeadline}
                 </h1>
                 <div className="rfi" style={{ animationDelay: "0.14s", height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.5)}, rgba(0,0,0,0.05), transparent)`, maxWidth: "60vw", marginBottom: "32px" }} />
-                <div className="ru" style={{ animationDelay: "0.16s", display: "flex", gap: "0", marginBottom: "36px" }}>
+                <div className="ru hero-stats-row" style={{ animationDelay: "0.16s", display: "flex", gap: "0", marginBottom: "36px" }}>
                   {grocer.contextStat.map((s, i) => (
-                    <div key={i} style={{ paddingRight: "48px", marginRight: "48px", borderRight: i < grocer.contextStat.length - 1 ? "1px solid rgba(0,0,0,0.08)" : "none" }}>
-                      <div style={{ fontSize: "clamp(2.2rem,4vw,4.8rem)", fontWeight: 900, color: i === 0 ? brand : "rgba(0,0,0,0.25)", letterSpacing: "-0.05em", lineHeight: 0.9, marginBottom: "10px" }}>
+                    <div key={i} className="hero-stat-item" style={{ paddingRight: "48px", marginRight: "48px", borderRight: i < grocer.contextStat.length - 1 ? "1px solid rgba(0,0,0,0.08)" : "none" }}>
+                      <div className="hero-stat-num" style={{ fontSize: "clamp(2.2rem,4vw,4.8rem)", fontWeight: 900, color: i === 0 ? brand : "rgba(0,0,0,0.25)", letterSpacing: "-0.05em", lineHeight: 0.9, marginBottom: "10px" }}>
                         {s.value}
                       </div>
                       <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.35)", lineHeight: 1.5, maxWidth: "200px" }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
-                <div className="ru" style={{ animationDelay: "0.2s", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "40px" }}>
+                <div className="ru hero-bottom-row" style={{ animationDelay: "0.2s", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "40px" }}>
                   <p style={{ fontSize: "clamp(0.9rem,1.1vw,1rem)", color: "rgba(0,0,0,0.45)", lineHeight: 1.75, maxWidth: "480px", margin: 0 }}>
                     {grocer.heroSubheadline}
                   </p>
@@ -1519,7 +1535,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
 
           {/* Main content — fills remaining height */}
-          <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", padding:"0 8vw", position:"relative", zIndex:2, gap:"0" }}>
+          <div className="hero-content" style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", padding:"0 8vw", position:"relative", zIndex:2, gap:"0" }}>
 
             {/* Grocer logo + name */}
             <div className="ru" style={{ animationDelay:"0.06s", marginBottom:"20px" }}>
@@ -1527,7 +1543,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             </div>
 
             {/* Main headline — full width, very large */}
-            <h1 className="ru" style={{ animationDelay:"0.1s", fontSize:"clamp(1.8rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.0, letterSpacing:"-0.04em", maxWidth:"22ch", marginBottom:"32px" }}>
+            <h1 className="ru hero-h1" style={{ animationDelay:"0.1s", fontSize:"clamp(1.8rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.0, letterSpacing:"-0.04em", maxWidth:"22ch", marginBottom:"32px" }}>
               {grocer.heroHeadline}
             </h1>
 
@@ -1535,10 +1551,10 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${rgba(brand,0.7)},rgba(255,255,255,0.06),transparent)`, maxWidth:"60vw", marginBottom:"32px" }} />
 
             {/* Stats row — large numbers spread horizontally */}
-            <div className="ru" style={{ animationDelay:"0.16s", display:"flex", gap:"0", marginBottom:"36px" }}>
+            <div className="ru hero-stats-row" style={{ animationDelay:"0.16s", display:"flex", gap:"0", marginBottom:"36px" }}>
               {grocer.contextStat.map((s, i) => (
-                <div key={i} style={{ paddingRight:"48px", marginRight:"48px", borderRight: i < grocer.contextStat.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
-                  <div style={{ fontSize:"clamp(2.2rem,4vw,4.8rem)", fontWeight:900, color: i===0 ? brandLight : "rgba(255,255,255,0.5)", letterSpacing:"-0.05em", lineHeight:0.9, marginBottom:"10px" }}>
+                <div key={i} className="hero-stat-item" style={{ paddingRight:"48px", marginRight:"48px", borderRight: i < grocer.contextStat.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
+                  <div className="hero-stat-num" style={{ fontSize:"clamp(2.2rem,4vw,4.8rem)", fontWeight:900, color: i===0 ? brandLight : "rgba(255,255,255,0.5)", letterSpacing:"-0.05em", lineHeight:0.9, marginBottom:"10px" }}>
                     {s.value}
                   </div>
                   <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.28)", lineHeight:1.5, maxWidth:"200px" }}>{s.label}</div>
@@ -1547,7 +1563,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             </div>
 
             {/* Subheadline + CTA row */}
-            <div className="ru" style={{ animationDelay:"0.2s", display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:"40px" }}>
+            <div className="ru hero-bottom-row" style={{ animationDelay:"0.2s", display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:"40px" }}>
               <p style={{ fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.32)", lineHeight:1.75, maxWidth:"480px", margin:0 }}>
                 {grocer.heroSubheadline}
               </p>
