@@ -343,12 +343,29 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         .t1-reveal-d2      { transition-delay: 180ms; }
         .t1-reveal-d3      { transition-delay: 280ms; }
 
+        /* ── Mobile responsive ── */
+        @media (max-width: 768px) {
+          .nav-pill-item { width: 26px !important; height: 26px !important; }
+          .section-two-col { grid-template-columns: 1fr !important; }
+          .section-two-col-rev { grid-template-columns: 1fr !important; }
+          .finding-section { flex-direction: column !important; height: auto !important; min-height: 100dvh !important; overflow-y: auto !important; scroll-snap-align: start; padding: 80px 20px 40px !important; }
+          .finding-section > * { width: 100% !important; max-width: 100% !important; }
+        }
+        @media (hover: none) {
+          .dock-tooltip { display: none !important; }
+        }
+        .powered-by-util { display: flex; }
+        @media (max-width: 640px) {
+          .powered-by-util { display: none !important; }
+          .brand-label-fixed { display: none !important; }
+        }
+
       `}</style>
 
       {/* ── NAV ── */}
 
       {/* Top-left: brand identity */}
-      <div style={{
+      <div className="brand-label-fixed" style={{
         position: "fixed", top: "20px", left: "28px", zIndex: 50,
         display: "flex", alignItems: "center", gap: "10px",
         pointerEvents: "none",
@@ -415,7 +432,10 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         boxShadow: isLightNav
           ? "0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)"
           : `0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px ${rgba(brand,0.12)}, inset 0 1px 0 rgba(255,255,255,0.05)`,
-      }}>
+        maxWidth: "calc(100vw - 140px)",
+        overflowX: "auto",
+        scrollbarWidth: "none",
+      } as React.CSSProperties}>
         {/* Home */}
         <button
           onClick={() => { setRippleIdx(-1); setTimeout(() => setRippleIdx(null), 900); scrollTo(0); }}
@@ -514,7 +534,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         display: "flex", alignItems: "center", gap: "10px",
       }}>
         {/* Powered by */}
-        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+        <div className="powered-by-util" style={{ alignItems: "center", gap: "7px" }}>
           <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)", whiteSpace: "nowrap" }}>Powered by</span>
           <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={28} height={21} style={{ objectFit: "contain", filter: isLightNav ? "none" : "brightness(0) invert(1)", opacity: 0.75, display: "block" }} />
         </div>
@@ -552,7 +572,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       {/* ── CTA DOCK — single glass pill, right-center ── */}
       {activeIdx !== total + 1 && (
         <div className="dock-pill" style={{
-          position: "fixed", right: "20px", top: "50%", transform: "translateY(-50%)",
+          position: "fixed", right: "max(12px, 2vw)", top: "50%", transform: "translateY(-50%)",
           zIndex: 49,
           display: "flex", flexDirection: "column", alignItems: "center",
           padding: "8px 7px", gap: "2px", borderRadius: "100px",
@@ -682,7 +702,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       <div
         ref={scrollRef}
         style={{
-          height: "100vh", overflowY: "scroll",
+          height: "100dvh", overflowY: "scroll",
           scrollSnapType: "y mandatory",
           scrollbarWidth: "none",
           position: "relative", zIndex: 2,
@@ -695,7 +715,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             {/* LIGHT HERO */}
             <section
               ref={el => { sectionRefs.current[0] = el; }}
-              style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", background: "#fafaf8" }}
+              style={{ height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", background: "#fafaf8" }}
             >
               {/* Base: clean white */}
               <div style={{ position: "absolute", inset: 0, background: "#fafaf8", zIndex: 0 }} />
@@ -750,7 +770,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               const bg = idx % 2 === 0 ? "#ffffff" : "#f4f4f2";
 
               const textCol = (
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `56px ${isA ? "48px" : "8vw"} 56px ${isA ? "8vw" : "48px"}`, position: "relative", zIndex: 1, gap: "20px" }}>
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `clamp(24px, 5vw, 56px) ${isA ? "clamp(16px, 4vw, 48px)" : "8vw"} clamp(24px, 5vw, 56px) ${isA ? "8vw" : "clamp(16px, 4vw, 48px)"}`, position: "relative", zIndex: 1, gap: "20px" }}>
                   <div className="ru" style={{ animationDelay: "0.04s", display: "flex", alignItems: "center", gap: "10px" }}>
                     <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: brand }}>{p.title}</span>
                   </div>
@@ -761,7 +781,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               );
 
               const statCol = (
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `56px ${isA ? "8vw" : "48px"} 56px ${isA ? "48px" : "8vw"}`, position: "relative", zIndex: 1, gap: "20px" }}>
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: `clamp(24px, 5vw, 56px) ${isA ? "8vw" : "clamp(16px, 4vw, 48px)"} clamp(24px, 5vw, 56px) ${isA ? "clamp(16px, 4vw, 48px)" : "8vw"}`, position: "relative", zIndex: 1, gap: "20px" }}>
                   <div className="ru" style={{ animationDelay: "0.1s", display: "flex", alignItems: "center", gap: "24px" }}>
                     {(() => {
                       const vsMatch = p.stat.match(/^(\d+)%\s*vs\.?\s*(\d+)%$/i);
@@ -808,7 +828,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               );
 
               return (
-                <section key={`light-${idx}`} ref={el => { sectionRefs.current[idx + 1] = el; }} style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "grid", gridTemplateColumns: isA ? "55% 45%" : "45% 55%", position: "relative", overflow: "hidden", background: bg }}>
+                <section key={`light-${idx}`} ref={el => { sectionRefs.current[idx + 1] = el; }} className={isA ? "section-two-col" : "section-two-col-rev"} style={{ height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "grid", gridTemplateColumns: isA ? "55% 45%" : "45% 55%", position: "relative", overflow: "hidden", background: bg }}>
                   <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 55% 65% at ${isA ? "100%" : "0%"} 50%, ${rgba(brand, 0.05)} 0%, transparent 55%)`, pointerEvents: "none" }} />
                   {isA ? <>{textCol}{statCol}</> : <>{statCol}{textCol}</>}
                 </section>
@@ -818,7 +838,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             {/* LIGHT END — CLOSING MANIFESTO */}
             <section
               ref={el => { sectionRefs.current[total + 1] = el; }}
-              style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#f8f8f6" }}
+              style={{ height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#f8f8f6" }}
             >
               {/* Ambient accents */}
               <div style={{ position: "absolute", top: "0%", left: "-10%", width: "60vw", height: "60vh", background: `radial-gradient(ellipse,${rgba(brand,.06)} 0%,transparent 58%)`, pointerEvents: "none" }} />
@@ -860,7 +880,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* ZONE 3: Two invitation cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
 
                   {/* Card A — Full Report */}
                   <div style={{ borderRadius: "16px", background: "#fff", border: `1px solid ${rgba(brand,.18)}`, boxShadow: `0 4px 24px ${rgba(brand,.08)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
@@ -936,7 +956,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <section
               ref={el => { sectionRefs.current[0] = el; }}
               style={{
-                height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always",
+                height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always",
                 display: "flex", flexDirection: "column",
                 position: "relative", overflow: "hidden",
                 background: "#06040f",
@@ -972,7 +992,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {/* Hero title — Oswald, split at em-dash for two-line drama */}
                 <h1 className="reveal reveal-d1" style={{
                   fontFamily: "var(--font-display),sans-serif",
-                  fontSize: "clamp(1.6rem,2.4vw,2.8rem)",
+                  fontSize: "clamp(1.8rem,2.4vw,2.8rem)",
                   fontWeight: 700, color: "#f0eeff",
                   lineHeight: .94, letterSpacing: "-.01em", textTransform: "uppercase",
                   maxWidth: "860px", marginBottom: "20px",
@@ -1030,7 +1050,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {/* Thin separator line */}
                 <div className="reveal" style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand,.5)}, rgba(124,58,237,.3), transparent)`, marginBottom: "20px" }} />
 
-                <div className="reveal reveal-d1" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
+                <div className="reveal reveal-d1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
                   {grocer.contextStat.map((s, si) => (
                     <div key={si} className="t2-bento" style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
                       {/* Stat number with glow */}
@@ -1069,7 +1089,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 Right half: title at top, body paragraph, 3 numbered bullet rows below
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[0] && (() => { const p = grocer.provocations[0]; return (
-            <section ref={el => { sectionRefs.current[1] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[1] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 60% 80% at 0% 50%, ${rgba(brand,.12)} 0%, transparent 55%)`, pointerEvents:"none" }} />
               <div style={{ position:"absolute", top:"10%", right:"5%", width:"400px", height:"400px", background:"radial-gradient(ellipse,rgba(109,40,217,.1) 0%,transparent 60%)", pointerEvents:"none" }} />
 
@@ -1112,7 +1132,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 stat card left (tall), body+bullets split into 2 bento cards right.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[1] && (() => { const p = grocer.provocations[1]; return (
-            <section ref={el => { sectionRefs.current[2] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[2] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:"70vw", height:"50vh", background:"radial-gradient(ellipse,rgba(109,40,217,.1) 0%,transparent 65%)", pointerEvents:"none" }} />
               <div style={{ position:"absolute", bottom:"10%", left:"5%", width:"350px", height:"350px", background:`radial-gradient(ellipse,${rgba(brand,.1)} 0%,transparent 60%)`, pointerEvents:"none" }} />
 
@@ -1156,7 +1176,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 3 bullets as a bare horizontal row — no cards, no columns.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[2] && (() => { const p = grocer.provocations[2]; return (
-            <section ref={el => { sectionRefs.current[3] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[3] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 65% 50% at 50% 60%, ${rgba(brand,.09)} 0%, transparent 60%)`, pointerEvents:"none" }} />
 
               <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", gap:"0" }}>
@@ -1180,7 +1200,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
 
                 {/* ── Row 4: 3 bullets as bare horizontal list ── */}
-                <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"0" }}>
+                <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:"0" }}>
                   {p.bullets.map((b, bi) => (
                     <div key={bi} style={{ padding:`14px ${bi===1?"28px":"0"} 14px ${bi===0?"0":"28px"}`, borderLeft: bi>0 ? `1px solid rgba(124,58,237,.15)` : "none", display:"flex", flexDirection:"column", gap:"8px" }}>
                       <div style={{ width:"24px", height:"2px", background: bi===0 ? brand : bi===1 ? "#7c3aed" : brandLight }} />
@@ -1199,7 +1219,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 Wide right: oversized stat arc top-right, then 3 keynote rows below it.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[3] && (() => { const p = grocer.provocations[3]; return (
-            <section ref={el => { sectionRefs.current[4] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[4] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", top:0, right:0, width:"55vw", height:"60vh", background:`radial-gradient(ellipse at top right,${rgba(brand,.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
               <div style={{ position:"absolute", bottom:"15%", left:"10%", width:"300px", height:"300px", background:"radial-gradient(ellipse,rgba(124,58,237,.08) 0%,transparent 60%)", pointerEvents:"none" }} />
 
@@ -1245,7 +1265,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 in a 2-col row underneath — feels like a chapter break.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[4] && (() => { const p = grocer.provocations[4]; return (
-            <section ref={el => { sectionRefs.current[5] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#06041a" }}>
+            <section ref={el => { sectionRefs.current[5] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#06041a" }}>
               {/* Deep purple + brand gradient */}
               <div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg,#06041a 0%,#0d0926 50%,#06041a 100%)`, zIndex:0 }} />
               <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse 70% 60% at 50% 45%,rgba(124,58,237,.22) 0%,transparent 65%)", zIndex:1, pointerEvents:"none" }} />
@@ -1295,7 +1315,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 Feels like a roadmap / action plan — fitting for the final finding.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[5] && (() => { const p = grocer.provocations[5]; return (
-            <section ref={el => { sectionRefs.current[6] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[6] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 50% 70% at 100% 50%, ${rgba(brand,.12)} 0%, transparent 55%)`, pointerEvents:"none" }} />
               <div style={{ position:"absolute", top:"10%", left:"5%", width:"360px", height:"360px", background:"radial-gradient(ellipse,rgba(124,58,237,.09) 0%,transparent 60%)", pointerEvents:"none" }} />
 
@@ -1356,7 +1376,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <section
               ref={el => { sectionRefs.current[total + 1] = el; }}
               style={{
-                height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always",
+                height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always",
                 display: "flex", flexDirection: "column", justifyContent: "center",
                 padding: `0 max(32px,calc(50vw - 620px))`,
                 position: "relative", overflow: "hidden",
@@ -1405,7 +1425,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* ── ZONE 3: Two invitation cards ── */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
 
                   {/* Card A — Full Report */}
                   <div className="reveal reveal-d2" style={{ borderRadius: "16px", background: "#13102a", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.12)}`, padding: "32px 32px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
@@ -1482,7 +1502,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         {/* ══ HERO — Command Center ════════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[0] = el; }}
-          style={{ height:"100vh", scrollSnapAlign:"start", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column", background:"#050810" }}
+          style={{ height:"100dvh", scrollSnapAlign:"start", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column", background:"#050810" }}
         >
           {/* ── Hero gradient background — brand-matched animated aurora ── */}
           <div style={{ position:"absolute", inset:0, background:"#050810", zIndex:0 }} />
@@ -1555,7 +1575,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           const isA = idx % 2 === 0; // Layout A on odd findings (1,3,5), B on even (2,4,6)
 
           const textCol = (
-            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"48px":"8vw"} 56px ${isA?"8vw":"48px"}`, borderRight:"none", borderLeft:"none", position:"relative", zIndex:1, gap:"20px" }}>
+            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`clamp(24px, 5vw, 56px) ${isA?"clamp(16px, 4vw, 48px)":"8vw"} clamp(24px, 5vw, 56px) ${isA?"8vw":"clamp(16px, 4vw, 48px)"}`, borderRight:"none", borderLeft:"none", position:"relative", zIndex:1, gap:"20px" }}>
               <div className="ru" style={{ animationDelay:"0.04s", display:"flex", alignItems:"center", gap:"10px" }}>
                 <span style={{ fontSize:"11px", fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:brandLight, textShadow:`0 0 12px ${rgba(brand,0.9)}, 0 0 28px ${rgba(brand,0.5)}` }}>{p.title}</span>
               </div>
@@ -1566,7 +1586,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           );
 
           const statCol = (
-            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`56px ${isA?"8vw":"48px"} 56px ${isA?"48px":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
+            <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", padding:`clamp(24px, 5vw, 56px) ${isA?"8vw":"clamp(16px, 4vw, 48px)"} clamp(24px, 5vw, 56px) ${isA?"clamp(16px, 4vw, 48px)":"8vw"}`, position:"relative", zIndex:1, gap:"20px" }}>
               {/* Stat + label inline */}
               <div className="ru" style={{ animationDelay:"0.1s", display:"flex", alignItems:"center", gap:"24px" }}>
                 {(() => {
@@ -1612,7 +1632,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           );
 
           return (
-            <section key={idx} ref={el => { sectionRefs.current[idx+1] = el; }} style={{ height:"100vh", scrollSnapAlign:"start", display:"grid", gridTemplateColumns:isA?"55% 45%":"45% 55%", position:"relative", overflow:"hidden", background:"#080c12" }}>
+            <section key={idx} ref={el => { sectionRefs.current[idx+1] = el; }} className={isA ? "section-two-col" : "section-two-col-rev"} style={{ height:"100dvh", scrollSnapAlign:"start", display:"grid", gridTemplateColumns:isA?"55% 45%":"45% 55%", position:"relative", overflow:"hidden", background:"#080c12" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 55% 65% at ${isA?"100%":"0%"} 50%,${rgba(brand,0.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
               {isA ? <>{textCol}{statCol}</> : <>{statCol}{textCol}</>}
             </section>
@@ -1621,7 +1641,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         {/* ══ END — CLOSING MANIFESTO ═══════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[total + 1] = el; }}
-          style={{ height: "100vh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: `0 8vw`, paddingTop: "52px", position: "relative", overflow: "hidden", background: "#080c12" }}
+          style={{ height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: `0 8vw`, paddingTop: "52px", position: "relative", overflow: "hidden", background: "#080c12" }}
         >
           {/* Ambient glows */}
           <div style={{ position: "absolute", top: "0%", left: "-10%", width: "60vw", height: "60vh", background: `radial-gradient(ellipse,${rgba(brand,.09)} 0%,transparent 58%)`, pointerEvents: "none" }} />
@@ -1665,7 +1685,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             </div>
 
             {/* ── ZONE 3: Two invitation cards ── */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
 
               {/* Card A — Full Report */}
               <div style={{ borderRadius: "16px", background: "rgba(255,255,255,.04)", border: `1px solid ${rgba(brand,.25)}`, boxShadow: `0 8px 40px ${rgba(brand,.1)}`, padding: "32px 28px 28px", display: "flex", flexDirection: "column", gap: "12px", position: "relative", overflow: "hidden" }}>
