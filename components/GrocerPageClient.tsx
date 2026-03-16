@@ -359,162 +359,153 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         </span>
       </div>
 
-      {/* ── Right-side vertical floating nav ── */}
+      {/* ── Center floating pill nav ── */}
       <style>{`
-        @keyframes sidenavEnter {
-          from { opacity: 0; transform: translateX(20px); }
-          to   { opacity: 1; transform: translateX(0); }
+        @keyframes navItemEnter {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes inkDrop {
-          0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0.6; }
-          60%  { opacity: 0.25; }
-          100% { transform: translate(-50%, -50%) scale(4.5); opacity: 0; }
+          0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0.7; }
+          60%  { opacity: 0.2; }
+          100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+        }
+        @keyframes navDotPulse {
+          0%, 100% { box-shadow: 0 0 0 0 var(--dot-color), 0 0 5px var(--dot-color); }
+          55%       { box-shadow: 0 0 0 4px transparent, 0 0 14px var(--dot-color); }
+        }
+        @keyframes dockBreathe {
+          0%, 100% { transform: scale(1);    opacity: 1; }
+          50%       { transform: scale(1.06); opacity: 0.82; }
         }
         @keyframes dotSettle {
           0%   { transform: scale(1); }
-          40%  { transform: scale(1.45); }
-          70%  { transform: scale(0.9); }
+          40%  { transform: scale(1.5); }
+          70%  { transform: scale(0.88); }
           100% { transform: scale(1); }
         }
-        .sidenav-ink {
+        .nav-pill-item {
+          opacity: 0;
+          animation: navItemEnter 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .nav-pill-dot {
+          border-radius: 50%; flex-shrink: 0; display: block;
+          transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.25s ease, box-shadow 0.25s ease, width 0.35s cubic-bezier(0.34,1.56,0.64,1), height 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .nav-pill-item:hover .nav-pill-dot { transform: scale(1.7); }
+        .nav-pill-item.active .nav-pill-dot { animation: navDotPulse 2.5s ease-in-out infinite; }
+        .nav-ink {
           position: absolute; top: 50%; left: 50%;
-          width: 16px; height: 16px; border-radius: 50%;
-          border: 1px solid var(--dot-color);
-          background: transparent;
+          width: 14px; height: 14px; border-radius: 50%;
+          border: 1px solid var(--dot-color); background: transparent;
           pointer-events: none;
-          animation: inkDrop 0.9s cubic-bezier(0.2,0.8,0.2,1) forwards;
+          animation: inkDrop 0.85s cubic-bezier(0.2,0.8,0.2,1) forwards;
         }
-        .sidenav-dot-flash {
-          animation: dotSettle 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards !important;
-        }
-        @keyframes dotPulse {
-          0%, 100% { box-shadow: 0 0 0 0 var(--dot-color), 0 0 6px var(--dot-color); }
-          60%       { box-shadow: 0 0 0 5px transparent, 0 0 16px var(--dot-color); }
-        }
-        @keyframes progressFlow {
-          0%   { background-position: 0% 0%; }
-          100% { background-position: 0% 100%; }
-        }
-        .sidenav-item {
-          display: flex; align-items: center; justify-content: flex-end; gap: 10px;
-          cursor: pointer; opacity: 0;
-          animation: sidenavEnter 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
-        }
-        .sidenav-label-wrap {
-          display: grid; grid-template-columns: 0fr;
-          transition: grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1);
-        }
-        .sidenav-item:hover .sidenav-label-wrap { grid-template-columns: 1fr; }
-        .sidenav-label {
-          font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-          white-space: nowrap; overflow: hidden; min-width: 0;
-          opacity: 0; transform: translateX(10px);
-          transition: opacity 0.3s ease 0.1s, transform 0.4s cubic-bezier(0.16,1,0.3,1) 0.06s;
-          pointer-events: none;
-        }
-        .sidenav-item:hover .sidenav-label { opacity: 1; transform: translateX(0); }
-        .sidenav-dot {
-          flex-shrink: 0; border-radius: 50%;
-          transition:
-            width  0.45s cubic-bezier(0.34,1.56,0.64,1),
-            height 0.45s cubic-bezier(0.34,1.56,0.64,1),
-            background 0.3s ease,
-            box-shadow 0.3s ease,
-            transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        .sidenav-item:hover:not(.active) .sidenav-dot { transform: scale(1.6); }
-        .sidenav-item.active .sidenav-dot {
-          animation: dotPulse 2.8s ease-in-out infinite;
-        }
+        .nav-dot-flash { animation: dotSettle 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards !important; }
       `}</style>
       <nav style={{
-        position: "fixed", right: "24px", top: "50%", transform: "translateY(-50%)",
+        position: "fixed", top: "14px", left: "50%", transform: "translateX(-50%)",
         zIndex: 50,
-        display: "flex", flexDirection: "column", alignItems: "flex-end",
+        display: "flex", alignItems: "center", gap: "4px",
+        padding: "7px 10px",
+        borderRadius: "100px",
+        background: isLightNav ? "rgba(255,255,255,0.85)" : "rgba(10,10,20,0.8)",
+        backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
+        border: isLightNav ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.09)",
+        boxShadow: isLightNav
+          ? "0 8px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)"
+          : `0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px ${rgba(brand,0.12)}, inset 0 1px 0 rgba(255,255,255,0.05)`,
       }}>
-        {(() => {
-          const navItems = [
-            { label: "Overview", idx: 0, number: "" },
-            ...grocer.provocations.map((p, i) => ({ label: p.title.replace(/^The\s+/i, ""), idx: i + 1, number: p.number ?? "" })),
-            { label: "Next Steps", idx: total + 1, number: "" },
-          ];
-          const totalItems = navItems.length;
-          // progress: fraction of line filled (0 → 1)
-          const progress = activeIdx / (totalItems - 1);
+        {/* Home */}
+        <button
+          onClick={() => { setRippleIdx(-1); setTimeout(() => setRippleIdx(null), 900); scrollTo(0); }}
+          className={`nav-pill-item${activeIdx === 0 ? " active" : ""}`}
+          title="Overview"
+          style={{ background: activeIdx === 0 ? (isLightNav ? rgba(brand,0.1) : rgba(brand,0.16)) : "transparent", border: "none", cursor: "pointer", width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", flexShrink: 0, transition: "background 0.2s", animationDelay: "0ms" } as React.CSSProperties}
+          onMouseEnter={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
+          onMouseLeave={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+        >
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={activeIdx === 0 ? brand : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)"} strokeWidth={2.2} style={{ transition: "stroke 0.25s" }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          {rippleIdx === -1 && <span className="nav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />}
+        </button>
 
-          return navItems.map((item, si) => {
-            const isActive = activeIdx === item.idx;
-            const isDone = activeIdx > item.idx;
-            const labelColor = isActive
-              ? (isLightNav ? "rgba(0,0,0,0.85)" : "#fff")
-              : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)";
-            const trackColor = isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)";
-            const doneColor = rgba(brand, 0.45);
-            const isLast = si === totalItems - 1;
+        {/* Separator */}
+        <div style={{ width: "1px", height: "14px", background: isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", flexShrink: 0 }} />
 
-            return (
-              <div key={item.idx} style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                <button
-                  onClick={() => {
-                    setRippleIdx(item.idx);
-                    setTimeout(() => setRippleIdx(null), 900);
-                    scrollTo(item.idx);
-                  }}
-                  className={`sidenav-item${isActive ? " active" : ""}`}
-                  style={{
-                    background: "none", border: "none", padding: "3px 0",
-                    display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px",
-                    cursor: "pointer",
-                    animationDelay: `${si * 70}ms`,
-                  }}
-                >
-                  <div className="sidenav-label-wrap">
-                    <span className="sidenav-label" style={{ color: labelColor }}>
-                      {item.number ? `${item.number}  ${item.label}` : item.label}
-                    </span>
-                  </div>
-                  {/* Dot — grows when active, particles + beam on click */}
-                  <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "16px", height: "16px", flexShrink: 0 }}>
-                    <span
-                      className={`sidenav-dot${rippleIdx === item.idx ? " sidenav-dot-flash" : ""}`}
-                      style={{
-                        width:  isActive ? "11px" : "7px",
-                        height: isActive ? "11px" : "7px",
-                        background: isActive ? brand : isDone ? doneColor : isLightNav ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.2)",
-                        boxShadow: isActive ? `0 0 10px ${rgba(brand, 0.6)}` : "none",
-                        ["--dot-color" as string]: rgba(brand, 0.6),
-                      } as React.CSSProperties}
-                    />
-                    {rippleIdx === item.idx && (
-                      <span className="sidenav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />
-                    )}
-                  </span>
-                </button>
-
-                {/* Connector segment between dots */}
-                {!isLast && (
-                  <div style={{
-                    width: "2px", height: "18px",
-                    marginRight: "7px",
-                    borderRadius: "2px",
-                    background: trackColor,
-                    overflow: "hidden",
-                    position: "relative",
-                  }}>
-                    {/* filled portion */}
-                    <div style={{
-                      position: "absolute", top: 0, left: 0, right: 0,
-                      height: isDone ? "100%" : isActive ? "50%" : "0%",
-                      background: `linear-gradient(to bottom, ${brand}, ${rgba(brand, 0.5)})`,
-                      transition: "height 0.5s cubic-bezier(0.4,0,0.2,1)",
-                      borderRadius: "2px",
-                    }} />
-                  </div>
-                )}
+        {/* Section tabs */}
+        {grocer.provocations.map((p, i) => {
+          const idx = i + 1;
+          const isActive = activeIdx === idx;
+          const shortLabel = p.title.replace(/^The\s+/i, "");
+          return (
+            <button
+              key={idx}
+              onClick={() => { setRippleIdx(idx); setTimeout(() => setRippleIdx(null), 900); scrollTo(idx); }}
+              className={`nav-pill-item${isActive ? " active" : ""}`}
+              title={p.title}
+              style={{
+                background: isActive ? (isLightNav ? rgba(brand,0.1) : rgba(brand,0.16)) : "transparent",
+                border: "none", cursor: "pointer",
+                height: "32px", borderRadius: "100px",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                padding: "0 8px",
+                position: "relative", flexShrink: 0,
+                transition: "background 0.35s ease",
+                animationDelay: `${(i + 1) * 50}ms`,
+              } as React.CSSProperties}
+              onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
+              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            >
+              {/* Number — fades to brand color when active */}
+              <span style={{
+                fontSize: "10px", fontWeight: 800, letterSpacing: "0.06em",
+                color: isActive ? brand : isLightNav ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)",
+                lineHeight: 1, flexShrink: 0,
+                transition: "color 0.35s ease",
+              }}>
+                {p.number}
+              </span>
+              {/* Label — expands smoothly via grid trick */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: isActive ? "1fr" : "0fr",
+                transition: "grid-template-columns 0.45s cubic-bezier(0.4,0,0.2,1)",
+              }}>
+                <span style={{
+                  overflow: "hidden", whiteSpace: "nowrap", minWidth: 0,
+                  fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase",
+                  color: isLightNav ? "rgba(0,0,0,0.85)" : "#fff",
+                  paddingLeft: isActive ? "6px" : "0",
+                  opacity: isActive ? 1 : 0,
+                  transition: "opacity 0.3s ease 0.1s, padding-left 0.45s cubic-bezier(0.4,0,0.2,1)",
+                }}>
+                  {shortLabel}
+                </span>
               </div>
-            );
-          });
-        })()}
+              {rippleIdx === idx && <span className="nav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />}
+            </button>
+          );
+        })}
+
+        {/* Separator */}
+        <div style={{ width: "1px", height: "14px", background: isLightNav ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", flexShrink: 0 }} />
+
+        {/* Next Steps arrow */}
+        <button
+          onClick={() => { setRippleIdx(total + 1); setTimeout(() => setRippleIdx(null), 900); scrollTo(total + 1); }}
+          className={`nav-pill-item${activeIdx === total + 1 ? " active" : ""}`}
+          title="Next Steps"
+          style={{ background: activeIdx === total + 1 ? (isLightNav ? rgba(brand,0.1) : rgba(brand,0.16)) : "transparent", border: "none", cursor: "pointer", width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", flexShrink: 0, transition: "background 0.2s", animationDelay: `${(total + 2) * 50}ms` } as React.CSSProperties}
+          onMouseEnter={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
+          onMouseLeave={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+        >
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={activeIdx === total + 1 ? brand : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)"} strokeWidth={2.2} style={{ transition: "stroke 0.25s" }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+          {rippleIdx === total + 1 && <span className="nav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />}
+        </button>
       </nav>
 
       {/* Top-right: utilities */}
@@ -557,6 +548,132 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       </div>
 
       {/* ── NAV SPACER — pushes content below the 85px nav ── */}
+
+      {/* ── CTA DOCK — single glass pill, right-center ── */}
+      {activeIdx !== total + 1 && (
+        <div className="dock-pill" style={{
+          position: "fixed", right: "20px", top: "50%", transform: "translateY(-50%)",
+          zIndex: 49,
+          display: "flex", flexDirection: "column", alignItems: "center",
+          padding: "8px 7px", gap: "2px", borderRadius: "100px",
+          background: isLightNav
+            ? "rgba(255,255,255,0.35)"
+            : "rgba(255,255,255,0.07)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          border: isLightNav
+            ? "1px solid rgba(255,255,255,0.75)"
+            : "1px solid rgba(255,255,255,0.12)",
+          boxShadow: isLightNav
+            ? "0 8px 32px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.9) inset"
+            : "0 8px 32px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.08) inset",
+          animation: "dockBreathe 4s ease-in-out infinite",
+        } as React.CSSProperties}>
+          {/* Download Report */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+            <span className="dock-tooltip" style={{
+              position: "absolute", right: "calc(100% + 10px)", top: "50%",
+              transform: "translateY(-50%) translateX(6px)",
+              whiteSpace: "nowrap", fontSize: "10px", fontWeight: 700,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+              color: isLightNav ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.8)",
+              background: isLightNav ? "rgba(255,255,255,0.85)" : "rgba(12,12,24,0.82)",
+              backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+              border: isLightNav ? "1px solid rgba(255,255,255,0.9)" : "1px solid rgba(255,255,255,0.1)",
+              boxShadow: isLightNav ? "0 4px 16px rgba(0,0,0,0.08)" : "0 4px 16px rgba(0,0,0,0.35)",
+              padding: "5px 10px", borderRadius: "8px",
+              opacity: 0, pointerEvents: "none",
+              transition: "opacity 0.2s ease, transform 0.2s ease",
+            }}>Download Report</span>
+            <button
+              onClick={() => scrollTo(total + 1)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: "32px", height: "32px", borderRadius: "50%",
+                background: "transparent", border: "none", cursor: "pointer",
+                color: isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)",
+                transition: "color 0.18s, background 0.18s",
+              }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = isLightNav ? "rgba(0,0,0,0.85)" : "rgba(255,255,255,0.9)";
+                el.style.background = isLightNav ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.1)";
+                const tip = el.parentElement?.querySelector(".dock-tooltip") as HTMLElement;
+                if (tip) { tip.style.opacity = "1"; tip.style.transform = "translateY(-50%) translateX(0)"; }
+                (el.closest(".dock-pill") as HTMLElement | null)?.style.setProperty("animation-play-state", "paused");
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)";
+                el.style.background = "transparent";
+                const tip = el.parentElement?.querySelector(".dock-tooltip") as HTMLElement;
+                if (tip) { tip.style.opacity = "0"; tip.style.transform = "translateY(-50%) translateX(6px)"; }
+                (el.closest(".dock-pill") as HTMLElement | null)?.style.setProperty("animation-play-state", "running");
+              }}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
+          </div>
+
+          <div style={{
+            width: "14px", height: "1px",
+            background: isLightNav
+              ? "linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)"
+              : "linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)",
+          }} />
+
+          {/* Schedule a Call */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+            <span className="dock-tooltip" style={{
+              position: "absolute", right: "calc(100% + 10px)", top: "50%",
+              transform: "translateY(-50%) translateX(6px)",
+              whiteSpace: "nowrap", fontSize: "10px", fontWeight: 700,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+              color: isLightNav ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.8)",
+              background: isLightNav ? "rgba(255,255,255,0.85)" : "rgba(12,12,24,0.82)",
+              backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+              border: isLightNav ? "1px solid rgba(255,255,255,0.9)" : "1px solid rgba(255,255,255,0.1)",
+              boxShadow: isLightNav ? "0 4px 16px rgba(0,0,0,0.08)" : "0 4px 16px rgba(0,0,0,0.35)",
+              padding: "5px 10px", borderRadius: "8px",
+              opacity: 0, pointerEvents: "none",
+              transition: "opacity 0.2s ease, transform 0.2s ease",
+            }}>Schedule a Call</span>
+            <button
+              onClick={() => scrollTo(total + 1)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: "32px", height: "32px", borderRadius: "50%",
+                background: "transparent", border: "none", cursor: "pointer",
+                color: isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)",
+                transition: "color 0.18s, background 0.18s",
+              }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = isLightNav ? "rgba(0,0,0,0.85)" : "rgba(255,255,255,0.9)";
+                el.style.background = isLightNav ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.1)";
+                const tip = el.parentElement?.querySelector(".dock-tooltip") as HTMLElement;
+                if (tip) { tip.style.opacity = "1"; tip.style.transform = "translateY(-50%) translateX(0)"; }
+                (el.closest(".dock-pill") as HTMLElement | null)?.style.setProperty("animation-play-state", "paused");
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLButtonElement;
+                el.style.color = isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)";
+                el.style.background = "transparent";
+                const tip = el.parentElement?.querySelector(".dock-tooltip") as HTMLElement;
+                if (tip) { tip.style.opacity = "0"; tip.style.transform = "translateY(-50%) translateX(6px)"; }
+                (el.closest(".dock-pill") as HTMLElement | null)?.style.setProperty("animation-play-state", "running");
+              }}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── CURSOR ── */}
       <CustomCursor brand={brand} />
@@ -621,8 +738,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               </div>
 
               <div style={{ height: "1px", background: "rgba(0,0,0,0.07)", position: "relative", zIndex: 2 }} />
-              <div style={{ padding: "12px 8vw", display: "flex", justifyContent: "space-between", position: "relative", zIndex: 2 }}>
-                <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.4 }} />
+              <div style={{ padding: "12px 8vw", display: "flex", justifyContent: "flex-end", position: "relative", zIndex: 2 }}>
                 <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.38)" }}>131 retail executives · 2,533 shoppers</span>
               </div>
             </section>
@@ -641,19 +757,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   <WordFadeTitle text={p.hook} style={{ fontSize: "clamp(1.9rem,2.8vw,3rem)", fontWeight: 900, color: "#111", lineHeight: 1.05, letterSpacing: "-0.04em", margin: 0 }} />
                   <div className="rfi" style={{ animationDelay: "0.14s", height: "1px", background: `linear-gradient(90deg, ${rgba(brand, 0.3)}, transparent)` }} />
                   <p className="ru" style={{ animationDelay: "0.16s", fontSize: "clamp(1rem,1.2vw,1.1rem)", color: "rgba(0,0,0,0.65)", lineHeight: 1.9, margin: 0 }}>{p.body}</p>
-                  <div className="rfi" style={{ animationDelay:"0.2s", display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {([
-                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(0,0,0,0.6)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(0,0,0,0.15)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(0,0,0,0.05)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(0,0,0,0.3)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(0,0,0,0.15)"; }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
                 </div>
               );
 
@@ -999,19 +1102,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     ))}
                   </div>
                   <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
-                  <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {([
-                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
                 </div>
               </div>
             </section>
@@ -1056,19 +1146,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   </div>
                 </div>
                 <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
-                <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {([
-                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
               </div>
             </section>
             ); })()}
@@ -1113,19 +1190,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.15)", fontStyle:"italic", marginTop:"16px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
-                <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {([
-                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
               </div>
             </section>
             ); })()}
@@ -1170,19 +1234,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     </div>
                   ))}
                   <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
-                  <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {([
-                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
                 </div>
               </div>
             </section>
@@ -1232,19 +1283,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       </div>
                     ))}
                     <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
-                    <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {([
-                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
                   </div>
                 </div>
               </div>
@@ -1303,19 +1341,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     </div>
                     <div style={{ flex:1, height:"1px", background:`linear-gradient(90deg,${rgba(brand,.3)},transparent)` }} />
                     <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives</p>
-                    <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                    {([
-                      { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                      { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                    ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                      <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(220,215,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(220,215,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(220,215,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.4)"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(220,215,255,0.2)"; }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
                   </div>
                 </div>
               </div>
@@ -1514,8 +1539,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
           {/* Bottom rule */}
           <div style={{ height:"1px", background:"rgba(255,255,255,0.04)", position:"relative", zIndex:2 }} />
-          <div style={{ padding:"12px 8vw", display:"flex", justifyContent:"space-between", position:"relative", zIndex:2 }}>
-            <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
+          <div style={{ padding:"12px 8vw", display:"flex", justifyContent:"flex-end", position:"relative", zIndex:2 }}>
             <span style={{ fontSize:"9px", color:"rgba(255,255,255,0.35)" }}>131 retail executives · 2,533 shoppers</span>
           </div>
 
@@ -1538,19 +1562,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <WordFadeTitle text={p.hook} style={{ fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }} />
               <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
               <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.5)", lineHeight:1.9, margin:0 }}>{p.body}</p>
-              <div className="rfi" style={{ animationDelay:"0.2s", display:"flex", gap:"8px", alignItems:"center", marginTop:"8px" }}>
-                {([
-                  { label:"Access Full Report", href:"#", icon:<><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></> },
-                  { label:"Schedule a Call", href:"#", icon:<><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></> },
-                ] as {label:string;href:string;icon:React.ReactNode}[]).map(({label,href,icon}) => (
-                  <a key={label} href={href} onClick={e => { e.preventDefault(); scrollTo(total + 1); }} style={{ fontSize:"10px", fontWeight:700, letterSpacing:"0.1em", textTransform:"uppercase", color:"rgba(255,255,255,0.65)", textDecoration:"none", padding:"7px 14px", borderRadius:"7px", border:"1px solid rgba(255,255,255,0.2)", display:"inline-flex", alignItems:"center", gap:"6px", transition:"all 0.2s", cursor:"pointer" }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(255,255,255,0.07)"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(255,255,255,0.38)"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.borderColor="rgba(255,255,255,0.2)"; }}>
-                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icon}</svg>
-                    {label}
-                  </a>
-                ))}
-              </div>
             </div>
           );
 
