@@ -115,8 +115,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [rippleIdx, setRippleIdx] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     const root = scrollRef.current;
@@ -141,8 +150,12 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
   }, [theme]);
 
   const scrollTo = (idx: number) => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollTo({ top: idx * window.innerHeight, behavior: "smooth" });
+    const el = sectionRefs.current[idx];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (scrollRef.current) {
+      scrollRef.current.scrollTo({ top: idx * window.innerHeight, behavior: "smooth" });
+    }
   };
 
   const isLight = theme === "theme2";
@@ -345,34 +358,176 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
         /* ── Mobile responsive ── */
         @media (max-width: 768px) {
-          /* Nav — shrink buttons, hide labels */
-          .nav-pill-item { width: 28px !important; height: 28px !important; padding: 0 4px !important; }
-          .nav-label-expand { display: none !important; }
-          /* Section grids stack */
-          .section-two-col { grid-template-columns: 1fr !important; }
-          .section-two-col-rev { grid-template-columns: 1fr !important; }
-          /* Hero */
+          /* Hide desktop pill nav, show mobile bottom nav */
+          .desktop-nav { display: none !important; }
+          .brand-label-fixed { display: none !important; }
+
+          /* Disable scroll-snap on mobile — free scroll instead */
+          .scroll-container {
+            scroll-snap-type: none !important;
+          }
+          .scroll-container > section,
+          .scroll-container .mobile-scroll-section,
+          .scroll-container .section-two-col,
+          .scroll-container .section-two-col-rev,
+          .scroll-container .t2-finding-section,
+          .scroll-container .t2-hero-section,
+          .scroll-container .cta-section {
+            scroll-snap-align: none !important;
+            scroll-snap-stop: unset !important;
+          }
+
+          /* Bottom padding on all sections to clear mobile nav bar */
+          .mobile-scroll-section,
+          .section-two-col,
+          .section-two-col-rev,
+          .t2-finding-section,
+          .t2-hero-section,
+          .cta-section {
+            padding-bottom: 80px !important;
+          }
+          .finding-stat-col { padding-bottom: 80px !important; }
+
+          /* ── Scroll container: allow sections taller than screen to scroll ── */
+          .mobile-scroll-section {
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+            scroll-snap-align: start;
+          }
+
+          /* ── Hero — vertical stack ── */
+          .hero-content { padding: 80px 5vw 20px !important; }
           .hero-stats-row { flex-wrap: wrap !important; gap: 16px !important; }
-          .hero-stat-item { padding-right: 20px !important; margin-right: 20px !important; }
-          .hero-bottom-row { flex-direction: column !important; align-items: flex-start !important; gap: 20px !important; }
-          .hero-content { padding: 0 5vw !important; }
-          /* Attribution pills wrap */
-          .attr-pills-row { flex-wrap: wrap !important; gap: 10px !important; }
-          .attr-pill { flex-shrink: 1 !important; }
-          /* CTA cards */
-          .cta-cards-grid { grid-template-columns: 1fr !important; }
+          .hero-stat-item {
+            padding-right: 20px !important;
+            margin-right: 20px !important;
+            border-right: none !important;
+            min-width: 120px !important;
+          }
+          .hero-bottom-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 20px !important;
+          }
+          .hero-view-insights-btn { width: 100% !important; justify-content: center !important; }
+
+          /* ── T1/T2 Finding sections — single column ── */
+          .section-two-col {
+            grid-template-columns: 1fr !important;
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+          }
+          .section-two-col-rev {
+            grid-template-columns: 1fr !important;
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+          }
+
           /* Finding columns: normalize padding when stacked */
-          .finding-text-col { padding: 40px 5vw 20px !important; }
+          .finding-text-col { padding: 80px 5vw 20px !important; }
           .finding-stat-col { padding: 20px 5vw 40px !important; }
-          /* Dock pill hidden on mobile — not needed with touch */
+
+          /* ── T2 dark finding layouts — force single column ── */
+          .t2-two-col {
+            grid-template-columns: 1fr !important;
+            gap: 20px !important;
+            height: auto !important;
+          }
+          /* Finding 01: t2-two-col is a direct child wrapper — remove its own padding on mobile (section handles it) */
+          .t2-finding-section > .t2-two-col {
+            padding: 0 !important;
+          }
+          .t2-three-col {
+            grid-template-columns: 1fr !important;
+            max-height: none !important;
+            gap: 14px !important;
+          }
+          .t2-finding-section {
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+            padding-top: 80px !important;
+            padding-left: 5vw !important;
+            padding-right: 5vw !important;
+            padding-bottom: 40px !important;
+          }
+          /* T2 finding 01 magazine split — fix divider/border */
+          .t2-mag-left {
+            padding-right: 0 !important;
+            border-right: none !important;
+            padding-bottom: 24px !important;
+            border-bottom: 1px solid rgba(124,58,237,.15) !important;
+          }
+          .t2-mag-right {
+            padding-left: 0 !important;
+            padding-top: 24px !important;
+          }
+          /* T2 giant stat — scale down on mobile */
+          .t2-giant-stat { font-size: clamp(3.5rem, 16vw, 6rem) !important; }
+          /* T2 session strip — stack icon + content */
+          .t2-session { grid-template-columns: 1fr !important; }
+          .t2-session-left { border-right: none !important; border-bottom: 1px solid rgba(109,40,217,.22) !important; flex-direction: row !important; justify-content: flex-start !important; padding: 14px 18px !important; }
+          /* T2 stat breathe number — smaller */
+          .t2-stat { font-size: 2.4rem !important; }
+          /* T2 step-list right column separator */
+          .t2-step-right { border-left: none !important; border-top: 1px solid rgba(124,58,237,.15) !important; padding-left: 0 !important; padding-top: 20px !important; }
+
+          /* ── CTA / Next Steps section ── */
+          .cta-section {
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+            padding-top: 80px !important;
+            padding-left: 5vw !important;
+            padding-right: 5vw !important;
+            padding-bottom: 60px !important;
+            justify-content: flex-start !important;
+          }
+          .cta-cards-grid { grid-template-columns: 1fr !important; }
+          .cta-h2 { font-size: clamp(1.6rem, 7vw, 2.6rem) !important; }
+
+          /* ── Attribution pills wrap ── */
+          .attr-pills-row {
+            flex-wrap: wrap !important;
+            gap: 10px !important;
+            justify-content: center !important;
+          }
+          .attr-pill { flex-shrink: 1 !important; }
+
+          /* ── Dock pill hidden on mobile ── */
           .dock-pill { display: none !important; }
+
+          /* ── T2 hero section mobile ── */
+          .t2-hero-section {
+            height: auto !important;
+            min-height: 100dvh !important;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+          }
+          .t2-hero-zone1 { padding: 80px 5vw 0 !important; }
+          .t2-hero-zone2 { padding: 0 5vw 32px !important; }
+          .t2-hero-cta-row { flex-wrap: wrap !important; gap: 10px !important; }
+          .t2-hero-meta-pills { display: none !important; }
+          .t2-stat-bento-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
         }
+
         @media (max-width: 480px) {
           .nav-pill-item { width: 24px !important; height: 24px !important; }
-          .hero-h1 { font-size: clamp(1.5rem, 7vw, 2rem) !important; }
-          .hero-stat-num { font-size: clamp(1.8rem, 8vw, 2.8rem) !important; }
+          .hero-h1 { font-size: clamp(1.5rem, 7vw, 2.2rem) !important; }
+          .hero-stat-num { font-size: clamp(1.6rem, 7vw, 2.4rem) !important; }
           .powered-by-util { display: none !important; }
           .brand-label-fixed { display: none !important; }
+          .t2-stat-bento-grid { grid-template-columns: 1fr !important; }
+          .t2-section-heading { font-size: clamp(1.4rem, 6vw, 2rem) !important; }
+          .cta-h2 { font-size: clamp(1.4rem, 6vw, 2rem) !important; }
         }
         @media (hover: none) {
           .dock-tooltip { display: none !important; }
@@ -443,7 +598,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         }
         .nav-dot-flash { animation: dotSettle 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards !important; }
       `}</style>
-      <nav style={{
+      <nav className="desktop-nav" style={{
         position: "fixed", top: "14px", left: "50%", transform: "translateX(-50%)",
         zIndex: 50,
         display: "flex", alignItems: "center", gap: "4px",
@@ -550,6 +705,53 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           {rippleIdx === total + 1 && <span className="nav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />}
         </button>
       </nav>
+
+      {/* ── MOBILE BOTTOM NAV ── */}
+      {isMobile && (
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 20px",
+          background: isLightNav ? "rgba(255,255,255,0.92)" : "rgba(8,8,20,0.92)",
+          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          borderTop: isLightNav ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.08)",
+          boxSizing: "border-box",
+        } as React.CSSProperties}>
+          {/* Prev */}
+          <button
+            onClick={() => activeIdx > 0 && scrollTo(activeIdx - 1)}
+            disabled={activeIdx === 0}
+            style={{ width: 40, height: 40, borderRadius: "50%", border: "none", background: activeIdx === 0 ? "transparent" : rgba(brand, 0.12), color: activeIdx === 0 ? "transparent" : brand, cursor: activeIdx === 0 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}
+          >
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+
+          {/* Center label */}
+          {(() => {
+            const p = activeIdx > 0 && activeIdx <= total ? grocer.provocations[activeIdx - 1] : null;
+            const shortLabel = p ? p.title.replace(/^The\s+/i, "") : null;
+            return (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flex: 1, minWidth: 0, padding: "0 12px" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: rgba(brand, 0.9) }}>
+                  {activeIdx === 0 ? "Overview" : activeIdx === total + 1 ? "Next Steps" : p?.number ?? `${String(activeIdx).padStart(2, "0")}`}
+                </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.7)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>
+                  {activeIdx === 0 ? grocer.shortName : activeIdx === total + 1 ? "Next Steps" : shortLabel}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Next */}
+          <button
+            onClick={() => activeIdx < total + 1 && scrollTo(activeIdx + 1)}
+            disabled={activeIdx === total + 1}
+            style={{ width: 40, height: 40, borderRadius: "50%", border: "none", background: activeIdx === total + 1 ? "transparent" : rgba(brand, 0.12), color: activeIdx === total + 1 ? "transparent" : brand, cursor: activeIdx === total + 1 ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}
+          >
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      )}
 
       {/* Top-right: utilities */}
       <div style={{
@@ -721,6 +923,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       {/* ── SCROLL CONTAINER ── */}
       <div
         ref={scrollRef}
+        className="scroll-container"
         style={{
           height: "100dvh", overflowY: "scroll",
           scrollSnapType: "y mandatory",
@@ -735,6 +938,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             {/* LIGHT HERO */}
             <section
               ref={el => { sectionRefs.current[0] = el; }}
+              className="mobile-scroll-section"
               style={{ height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", background: "#fafaf8" }}
             >
               {/* Base: clean white */}
@@ -771,7 +975,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   <p style={{ fontSize: "clamp(1rem,1.2vw,1.1rem)", color: "rgba(0,0,0,0.65)", lineHeight: 1.75, maxWidth: "480px", margin: 0 }}>
                     {grocer.heroSubheadline}
                   </p>
-                  <button onClick={() => scrollTo(1)} style={{ flexShrink: 0, padding: "14px 32px", borderRadius: "7px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: `0 4px 20px ${rgba(brand, 0.3)}` }}>
+                  <button onClick={() => scrollTo(1)} className="hero-view-insights-btn" style={{ flexShrink: 0, padding: "14px 32px", borderRadius: "7px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: `0 4px 20px ${rgba(brand, 0.3)}`, display: "flex", alignItems: "center" }}>
                     View Insights →
                   </button>
                 </div>
@@ -858,6 +1062,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             {/* LIGHT END — CLOSING MANIFESTO */}
             <section
               ref={el => { sectionRefs.current[total + 1] = el; }}
+              className="cta-section"
               style={{ height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 8vw", paddingTop: "52px", position: "relative", overflow: "hidden", background: "#f8f8f6" }}
             >
               {/* Ambient accents */}
@@ -872,7 +1077,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
                     <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.9) }}>Next Steps</span>
                   </div>
-                  <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#0a0a0a", margin: 0, maxWidth: "720px" }}>
+                  <h2 className="cta-h2" style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#0a0a0a", margin: 0, maxWidth: "720px" }}>
                     The gap between{" "}
                     <span style={{ color: brand }}>knowing</span>
                     {" "}and{" "}
@@ -961,7 +1166,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
                 <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.4 }} />
                 <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.55)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-                <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.55)" }}>© 2025 Incisiv</span>
+                <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.55)" }}>© 2026</span>
               </div>
             </section>
           </>
@@ -975,6 +1180,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             ════════════════════════════════════════════════════════════════════════ */}
             <section
               ref={el => { sectionRefs.current[0] = el; }}
+              className="t2-hero-section mobile-scroll-section"
               style={{
                 height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always",
                 display: "flex", flexDirection: "column",
@@ -999,7 +1205,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <div style={{ position: "absolute", bottom: "38%", left: 0, right: 0, height: "120px", background: "linear-gradient(to top, rgba(4,3,12,.55) 0%, transparent 100%)", zIndex: 2, pointerEvents: "none" }} />
 
               {/* ── ZONE 1: Headline content (flex-grow fills top 60%) ── */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 4, padding: "72px max(32px,calc(50vw - 620px)) 0" }}>
+              <div className="t2-hero-zone1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative", zIndex: 4, padding: "72px max(32px,calc(50vw - 620px)) 0" }}>
 
                 {/* Eyebrow badge */}
                 <div className="reveal" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "5px 14px 5px 10px", borderRadius: "20px", background: rgba(brand, .1), border: `1px solid ${rgba(brand, .32)}`, marginBottom: "24px", alignSelf: "flex-start" }}>
@@ -1051,7 +1257,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     Download Report
                   </button>
                   {/* Meta pills */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "4px" }}>
+                  <div className="t2-hero-meta-pills" style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "4px" }}>
                     {[
                       { icon: <><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></>, label: "SSEB 2025" },
                       { icon: <><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></>, label: `${grocer.shortName}` },
@@ -1066,11 +1272,11 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               </div>
 
               {/* ── ZONE 2: Stat bento cards (fixed height ~38%) ── */}
-              <div style={{ position: "relative", zIndex: 4, padding: "0 max(32px,calc(50vw - 620px)) 32px" }}>
+              <div className="t2-hero-zone2" style={{ position: "relative", zIndex: 4, padding: "0 max(32px,calc(50vw - 620px)) 32px" }}>
                 {/* Thin separator line */}
                 <div className="reveal" style={{ height: "1px", background: `linear-gradient(90deg, ${rgba(brand,.5)}, rgba(124,58,237,.3), transparent)`, marginBottom: "20px" }} />
 
-                <div className="reveal reveal-d1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
+                <div className="t2-stat-bento-grid reveal reveal-d1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
                   {grocer.contextStat.map((s, si) => (
                     <div key={si} className="t2-bento" style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
                       {/* Stat number with glow */}
@@ -1109,17 +1315,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 Right half: title at top, body paragraph, 3 numbered bullet rows below
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[0] && (() => { const p = grocer.provocations[0]; return (
-            <section ref={el => { sectionRefs.current[1] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[1] = el; }} className="t2-finding-section" style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 60% 80% at 0% 50%, ${rgba(brand,.12)} 0%, transparent 55%)`, pointerEvents:"none" }} />
               <div style={{ position:"absolute", top:"10%", right:"5%", width:"400px", height:"400px", background:"radial-gradient(ellipse,rgba(109,40,217,.1) 0%,transparent 60%)", pointerEvents:"none" }} />
 
-              <div style={{ position:"relative", zIndex:1, display:"grid", gridTemplateColumns:"1fr 1fr", height:"100%", padding:`44px max(32px,calc(50vw - 620px)) 48px` }}>
+              <div className="t2-two-col" style={{ position:"relative", zIndex:1, display:"grid", gridTemplateColumns:"1fr 1fr", height:"100%", padding:`44px max(32px,calc(50vw - 620px)) 48px` }}>
 
                 {/* LEFT — big stat + hook */}
-                <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", paddingRight:"48px", borderRight:`1px solid rgba(124,58,237,.15)` }}>
+                <div className="t2-mag-left" style={{ display:"flex", flexDirection:"column", justifyContent:"center", paddingRight:"48px", borderRight:`1px solid rgba(124,58,237,.15)` }}>
                   <p className="t2-section-label reveal" style={{ marginBottom:"20px" }}>{p.title}</p>
                   {/* Giant stat */}
-                  <div className="reveal reveal-d1" style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(4rem,8vw,9rem)", fontWeight:800, lineHeight:.85, color:brandLight, "--sb-color":rgba(brand,.5), animation:"statBreathe 2.5s ease-in-out infinite", marginBottom:"12px" } as React.CSSProperties}>
+                  <div className="t2-giant-stat reveal reveal-d1" style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(4rem,8vw,9rem)", fontWeight:800, lineHeight:.85, color:brandLight, "--sb-color":rgba(brand,.5), animation:"statBreathe 2.5s ease-in-out infinite", marginBottom:"12px" } as React.CSSProperties}>
                     {p.stat}
                   </div>
                   <p className="reveal reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"14px", color:"rgba(220,215,255,.8)", lineHeight:1.5, maxWidth:"220px", marginBottom:"28px" }}>{p.statLabel}</p>
@@ -1128,7 +1334,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* RIGHT — title + body + bullets */}
-                <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", paddingLeft:"48px", gap:"20px" }}>
+                <div className="t2-mag-right" style={{ display:"flex", flexDirection:"column", justifyContent:"center", paddingLeft:"48px", gap:"20px" }}>
                   <h2 className="t2-section-heading reveal reveal-right" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)" }}>{p.hook}</h2>
                   <p className="reveal reveal-right reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(220,215,255,.8)", lineHeight:1.85 }}>{p.body}</p>
                   <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
@@ -1152,7 +1358,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 stat card left (tall), body+bullets split into 2 bento cards right.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[1] && (() => { const p = grocer.provocations[1]; return (
-            <section ref={el => { sectionRefs.current[2] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[2] = el; }} className="t2-finding-section" style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", top:"30%", left:"50%", transform:"translate(-50%,-50%)", width:"70vw", height:"50vh", background:"radial-gradient(ellipse,rgba(109,40,217,.1) 0%,transparent 65%)", pointerEvents:"none" }} />
               <div style={{ position:"absolute", bottom:"10%", left:"5%", width:"350px", height:"350px", background:`radial-gradient(ellipse,${rgba(brand,.1)} 0%,transparent 60%)`, pointerEvents:"none" }} />
 
@@ -1163,7 +1369,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
 
                 {/* 3-col bento: stat | body | bullets */}
-                <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"180px 1fr 1fr", gap:"14px", flex:1, maxHeight:"220px" }}>
+                <div className="t2-three-col reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"180px 1fr 1fr", gap:"14px", flex:1, maxHeight:"220px" }}>
                   {/* Stat card */}
                   <div className="t2-bento" style={{ padding:"20px", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", textAlign:"center", gap:"10px" }}>
                     <StatViz stat={p.stat} brand={brand} size={88} />
@@ -1196,7 +1402,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 3 bullets as a bare horizontal row — no cards, no columns.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[2] && (() => { const p = grocer.provocations[2]; return (
-            <section ref={el => { sectionRefs.current[3] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[3] = el; }} className="t2-finding-section" style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 65% 50% at 50% 60%, ${rgba(brand,.09)} 0%, transparent 60%)`, pointerEvents:"none" }} />
 
               <div style={{ position:"relative", zIndex:1, display:"flex", flexDirection:"column", gap:"0" }}>
@@ -1211,7 +1417,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 </div>
 
                 {/* ── Row 2: title + body side by side ── */}
-                <div className="reveal reveal-d1" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"40px", marginBottom:"24px" }}>
+                <div className="t2-two-col reveal reveal-d1" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"40px", marginBottom:"24px" }}>
                   <h2 className="t2-section-heading" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", margin:0 }}>{p.hook}</h2>
                   <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.78)", lineHeight:1.85, margin:0, alignSelf:"center" }}>{p.body}</p>
                 </div>
@@ -1239,11 +1445,11 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 Wide right: oversized stat arc top-right, then 3 keynote rows below it.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[3] && (() => { const p = grocer.provocations[3]; return (
-            <section ref={el => { sectionRefs.current[4] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[4] = el; }} className="t2-finding-section" style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", top:0, right:0, width:"55vw", height:"60vh", background:`radial-gradient(ellipse at top right,${rgba(brand,.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
               <div style={{ position:"absolute", bottom:"15%", left:"10%", width:"300px", height:"300px", background:"radial-gradient(ellipse,rgba(124,58,237,.08) 0%,transparent 60%)", pointerEvents:"none" }} />
 
-              <div style={{ position:"relative", zIndex:1, display:"grid", gridTemplateColumns:"2fr 3fr", gap:"40px", alignItems:"center" }}>
+              <div className="t2-two-col" style={{ position:"relative", zIndex:1, display:"grid", gridTemplateColumns:"2fr 3fr", gap:"40px", alignItems:"center" }}>
 
                 {/* Left — editorial text column */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"18px" }}>
@@ -1285,7 +1491,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 in a 2-col row underneath — feels like a chapter break.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[4] && (() => { const p = grocer.provocations[4]; return (
-            <section ref={el => { sectionRefs.current[5] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#06041a" }}>
+            <section ref={el => { sectionRefs.current[5] = el; }} className="t2-finding-section" style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#06041a" }}>
               {/* Deep purple + brand gradient */}
               <div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg,#06041a 0%,#0d0926 50%,#06041a 100%)`, zIndex:0 }} />
               <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse 70% 60% at 50% 45%,rgba(124,58,237,.22) 0%,transparent 65%)", zIndex:1, pointerEvents:"none" }} />
@@ -1311,7 +1517,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
 
                 {/* 2-col: body + bullets */}
-                <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"24px", paddingTop:"4px" }}>
+                <div className="t2-two-col reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"24px", paddingTop:"4px" }}>
                   <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.75)", lineHeight:1.85 }}>{p.body}</p>
                   <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
                     {p.bullets.map((b, bi) => (
@@ -1335,11 +1541,11 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 Feels like a roadmap / action plan — fitting for the final finding.
             ════════════════════════════════════════════════════════════════════════ */}
             {grocer.provocations[5] && (() => { const p = grocer.provocations[5]; return (
-            <section ref={el => { sectionRefs.current[6] = el; }} style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
+            <section ref={el => { sectionRefs.current[6] = el; }} className="t2-finding-section" style={{ height:"100dvh", scrollSnapAlign:"start", display:"flex", flexDirection:"column", justifyContent:"center", padding:`44px max(32px,calc(50vw - 620px)) 40px`, position:"relative", overflow:"hidden", background:"#080614" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 50% 70% at 100% 50%, ${rgba(brand,.12)} 0%, transparent 55%)`, pointerEvents:"none" }} />
               <div style={{ position:"absolute", top:"10%", left:"5%", width:"360px", height:"360px", background:"radial-gradient(ellipse,rgba(124,58,237,.09) 0%,transparent 60%)", pointerEvents:"none" }} />
 
-              <div style={{ position:"relative", zIndex:1, display:"grid", gridTemplateColumns:"1fr 1.6fr", gap:"48px", alignItems:"center" }}>
+              <div className="t2-two-col" style={{ position:"relative", zIndex:1, display:"grid", gridTemplateColumns:"1fr 1.6fr", gap:"48px", alignItems:"center" }}>
 
                 {/* Left — vertical step list */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"0" }}>
@@ -1395,6 +1601,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             ════════════════════════════════════════════════════════════════════════ */}
             <section
               ref={el => { sectionRefs.current[total + 1] = el; }}
+              className="cta-section"
               style={{
                 height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always",
                 display: "flex", flexDirection: "column", justifyContent: "center",
@@ -1417,7 +1624,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     <div style={{ width: "20px", height: "1px", background: rgba(brand,.6) }} />
                     <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.9) }}>Next Steps</span>
                   </div>
-                  <h2 style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 700, lineHeight: 1.0, letterSpacing: "-.01em", textTransform: "uppercase", color: "#f0eeff", margin: 0, maxWidth: "720px" }}>
+                  <h2 className="cta-h2" style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 700, lineHeight: 1.0, letterSpacing: "-.01em", textTransform: "uppercase", color: "#f0eeff", margin: 0, maxWidth: "720px" }}>
                     The gap between{" "}
                     <span style={{ color: brandLight }}>knowing</span>
                     {" "}and{" "}
@@ -1510,7 +1717,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px max(32px,calc(50vw - 620px))", borderTop: "1px solid rgba(109,40,217,.15)", display: "flex", justifyContent: "space-between" }}>
                 <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
                 <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.7)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.55)" }}>© 2025 Incisiv</span>
+                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.55)" }}>© 2026</span>
               </div>
             </section>
           </>
@@ -1522,6 +1729,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         {/* ══ HERO — Command Center ════════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[0] = el; }}
+          className="mobile-scroll-section"
           style={{ height:"100dvh", scrollSnapAlign:"start", position:"relative", overflow:"hidden", display:"flex", flexDirection:"column", background:"#050810" }}
         >
           {/* ── Hero gradient background — brand-matched animated aurora ── */}
@@ -1571,7 +1779,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               <p style={{ fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.65)", lineHeight:1.75, maxWidth:"480px", margin:0 }}>
                 {grocer.heroSubheadline}
               </p>
-              <button onClick={() => scrollTo(1)} style={{ flexShrink:0, padding:"14px 32px", borderRadius:"7px", background:brand, border:"none", color:"#fff", cursor:"pointer", fontSize:"11px", fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:`0 0 32px ${rgba(brand,0.45)}` }}>
+              <button onClick={() => scrollTo(1)} className="hero-view-insights-btn" style={{ flexShrink:0, padding:"14px 32px", borderRadius:"7px", background:brand, border:"none", color:"#fff", cursor:"pointer", fontSize:"11px", fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:`0 0 32px ${rgba(brand,0.45)}`, display:"flex", alignItems:"center" }}>
                 View Insights →
               </button>
             </div>
@@ -1652,7 +1860,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           );
 
           return (
-            <section key={idx} ref={el => { sectionRefs.current[idx+1] = el; }} className={isA ? "section-two-col" : "section-two-col-rev"} style={{ height:"100dvh", scrollSnapAlign:"start", display:"grid", gridTemplateColumns:isA?"55% 45%":"45% 55%", position:"relative", overflow:"hidden", background:"#080c12" }}>
+            <section key={idx} ref={el => { sectionRefs.current[idx+1] = el; }} className={isA ? "section-two-col" : "section-two-col-rev"} style={{ height:"100dvh", scrollSnapAlign:"start", scrollSnapStop:"always", display:"grid", gridTemplateColumns:isA?"55% 45%":"45% 55%", position:"relative", overflow:"hidden", background:"#080c12" }}>
               <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 55% 65% at ${isA?"100%":"0%"} 50%,${rgba(brand,0.1)} 0%,transparent 55%)`, pointerEvents:"none" }} />
               {isA ? <>{textCol}{statCol}</> : <>{statCol}{textCol}</>}
             </section>
@@ -1661,6 +1869,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         {/* ══ END — CLOSING MANIFESTO ═══════════════════════════════════════════ */}
         <section
           ref={el => { sectionRefs.current[total + 1] = el; }}
+          className="cta-section"
           style={{ height: "100dvh", scrollSnapAlign: "start", scrollSnapStop: "always", display: "flex", flexDirection: "column", justifyContent: "center", padding: `0 8vw`, paddingTop: "52px", position: "relative", overflow: "hidden", background: "#080c12" }}
         >
           {/* Ambient glows */}
@@ -1677,7 +1886,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
                 <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.9) }}>Next Steps</span>
               </div>
-              <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#fff", margin: 0, maxWidth: "720px" }}>
+              <h2 className="cta-h2" style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#fff", margin: 0, maxWidth: "720px" }}>
                 The gap between{" "}
                 <span style={{ color: brandLight }}>knowing</span>
                 {" "}and{" "}
@@ -1771,7 +1980,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
             <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
             <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)" }}>© 2025 Incisiv</span>
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)" }}>© 2026</span>
           </div>
         </section>
 

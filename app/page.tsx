@@ -115,7 +115,7 @@ export default function HomePage() {
       >
         <div className="max-w-5xl mx-auto flex justify-center">
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-            © 2025 Incisiv. All rights reserved.
+            © 2026. All rights reserved.
           </p>
         </div>
       </footer>
