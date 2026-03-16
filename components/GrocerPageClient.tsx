@@ -184,7 +184,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
   }, [isLight]);
 
   return (
-    <div style={{ background: isLight ? "#f8f8f6" : "#080c12", position: "relative", cursor: "none" }}>
+    <div style={{ background: isLight ? "#f8f8f6" : "#080c12", position: "relative" }}>
       <style>{`
         /* ── T1 animations ── */
         @keyframes fadeUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
@@ -394,7 +394,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
         pointerEvents: "none",
       }}>
         <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: brand, boxShadow: `0 0 10px ${rgba(brand, 0.9)}` }} />
-        <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.4)" }}>
+        <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.7)" }}>
           SSEB · 2025
         </span>
       </div>
@@ -468,7 +468,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           onMouseEnter={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
           onMouseLeave={e => { if (activeIdx !== 0) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
         >
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={activeIdx === 0 ? brand : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)"} strokeWidth={2.2} style={{ transition: "stroke 0.25s" }}>
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={activeIdx === 0 ? brand : isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.4)"} strokeWidth={2.2} style={{ transition: "stroke 0.25s" }}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
           {rippleIdx === -1 && <span className="nav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />}
@@ -504,7 +504,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               {/* Number — fades to brand color when active */}
               <span style={{
                 fontSize: "10px", fontWeight: 800, letterSpacing: "0.06em",
-                color: isActive ? brand : isLightNav ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)",
+                color: isActive ? brand : isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.75)",
                 lineHeight: 1, flexShrink: 0,
                 transition: "color 0.35s ease",
               }}>
@@ -544,7 +544,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           onMouseEnter={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = isLightNav ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)"; }}
           onMouseLeave={e => { if (activeIdx !== total + 1) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
         >
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={activeIdx === total + 1 ? brand : isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)"} strokeWidth={2.2} style={{ transition: "stroke 0.25s" }}>
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={activeIdx === total + 1 ? brand : isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.4)"} strokeWidth={2.2} style={{ transition: "stroke 0.25s" }}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
           {rippleIdx === total + 1 && <span className="nav-ink" style={{ ["--dot-color" as string]: rgba(brand, 0.7) } as React.CSSProperties} />}
@@ -558,7 +558,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
       }}>
         {/* Powered by */}
         <div className="powered-by-util" style={{ alignItems: "center", gap: "7px" }}>
-          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)", whiteSpace: "nowrap" }}>Powered by</span>
+          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isLightNav ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.65)", whiteSpace: "nowrap" }}>Powered by</span>
           <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={28} height={21} style={{ objectFit: "contain", filter: isLightNav ? "none" : "brightness(0) invert(1)", opacity: 0.75, display: "block" }} />
         </div>
 
@@ -574,16 +574,16 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           <button onClick={() => setTheme(t => t === "theme1" ? "theme2" : "theme1")} title={isLight ? "Switch to Dark" : "Switch to Light"}
             style={{ padding: "0", borderRadius: "20px", border: "none", background: isLightNav ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)", cursor: "pointer", width: "36px", height: "20px", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
             <span style={{ position: "absolute", inset: 0, borderRadius: "20px", border: isLightNav ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.12)" }} />
-            <span style={{ position: "absolute", left: isLightNav ? "17px" : "2px", top: "1px", width: "16px", height: "16px", borderRadius: "50%", background: isLightNav ? "#1e1b3a" : "#fff", boxShadow: isLightNav ? "0 1px 4px rgba(0,0,0,0.4)" : "0 1px 4px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", transition: "left 0.2s cubic-bezier(0.4,0,0.2,1)" }}>
+            <span style={{ position: "absolute", left: isLightNav ? "17px" : "2px", top: "1px", width: "16px", height: "16px", borderRadius: "50%", background: isLightNav ? "#1e1b3a" : "#fff", boxShadow: isLightNav ? "0 1px 4px rgba(0,0,0,0.65)" : "0 1px 4px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", transition: "left 0.2s cubic-bezier(0.4,0,0.2,1)" }}>
               {isLightNav ? <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="rgba(167,139,250,0.9)" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
                           : <svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="rgba(100,100,120,0.7)" strokeWidth={2}><circle cx="12" cy="12" r="4" /><path strokeLinecap="round" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></svg>}
             </span>
           </button>
           <div style={{ width: "1px", height: "14px", background: isLightNav ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)" }} />
           <button onClick={() => { sessionStorage.removeItem("sseb_grocer_id"); router.replace("/"); }} title="Log out"
-            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "3px 6px", borderRadius: "7px", border: "none", cursor: "pointer", background: "transparent", color: isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)", fontSize: "9px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", transition: "color 0.15s" }}
+            style={{ display: "flex", alignItems: "center", gap: "4px", padding: "3px 6px", borderRadius: "7px", border: "none", cursor: "pointer", background: "transparent", color: isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.4)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", transition: "color 0.15s" }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = isLightNav ? "rgba(0,0,0,0.85)" : "#fff"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)"; }}>
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.4)"; }}>
             <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
             Logout
           </button>
@@ -600,7 +600,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           display: "flex", flexDirection: "column", alignItems: "center",
           padding: "8px 7px", gap: "2px", borderRadius: "100px",
           background: isLightNav
-            ? "rgba(255,255,255,0.35)"
+            ? "rgba(255,255,255,0.65)"
             : "rgba(255,255,255,0.07)",
           backdropFilter: "blur(24px) saturate(180%)",
           WebkitBackdropFilter: "blur(24px) saturate(180%)",
@@ -623,7 +623,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               background: isLightNav ? "rgba(255,255,255,0.85)" : "rgba(12,12,24,0.82)",
               backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
               border: isLightNav ? "1px solid rgba(255,255,255,0.9)" : "1px solid rgba(255,255,255,0.1)",
-              boxShadow: isLightNav ? "0 4px 16px rgba(0,0,0,0.08)" : "0 4px 16px rgba(0,0,0,0.35)",
+              boxShadow: isLightNav ? "0 4px 16px rgba(0,0,0,0.08)" : "0 4px 16px rgba(0,0,0,0.6)",
               padding: "5px 10px", borderRadius: "8px",
               opacity: 0, pointerEvents: "none",
               transition: "opacity 0.2s ease, transform 0.2s ease",
@@ -634,7 +634,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 width: "32px", height: "32px", borderRadius: "50%",
                 background: "transparent", border: "none", cursor: "pointer",
-                color: isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)",
+                color: isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.75)",
                 transition: "color 0.18s, background 0.18s",
               }}
               onMouseEnter={e => {
@@ -647,7 +647,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               }}
               onMouseLeave={e => {
                 const el = e.currentTarget as HTMLButtonElement;
-                el.style.color = isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)";
+                el.style.color = isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.75)";
                 el.style.background = "transparent";
                 const tip = el.parentElement?.querySelector(".dock-tooltip") as HTMLElement;
                 if (tip) { tip.style.opacity = "0"; tip.style.transform = "translateY(-50%) translateX(6px)"; }
@@ -678,7 +678,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               background: isLightNav ? "rgba(255,255,255,0.85)" : "rgba(12,12,24,0.82)",
               backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
               border: isLightNav ? "1px solid rgba(255,255,255,0.9)" : "1px solid rgba(255,255,255,0.1)",
-              boxShadow: isLightNav ? "0 4px 16px rgba(0,0,0,0.08)" : "0 4px 16px rgba(0,0,0,0.35)",
+              boxShadow: isLightNav ? "0 4px 16px rgba(0,0,0,0.08)" : "0 4px 16px rgba(0,0,0,0.6)",
               padding: "5px 10px", borderRadius: "8px",
               opacity: 0, pointerEvents: "none",
               transition: "opacity 0.2s ease, transform 0.2s ease",
@@ -689,7 +689,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 width: "32px", height: "32px", borderRadius: "50%",
                 background: "transparent", border: "none", cursor: "pointer",
-                color: isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)",
+                color: isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.75)",
                 transition: "color 0.18s, background 0.18s",
               }}
               onMouseEnter={e => {
@@ -702,7 +702,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               }}
               onMouseLeave={e => {
                 const el = e.currentTarget as HTMLButtonElement;
-                el.style.color = isLightNav ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.45)";
+                el.style.color = isLightNav ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.75)";
                 el.style.background = "transparent";
                 const tip = el.parentElement?.querySelector(".dock-tooltip") as HTMLElement;
                 if (tip) { tip.style.opacity = "0"; tip.style.transform = "translateY(-50%) translateX(6px)"; }
@@ -717,9 +717,6 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           </div>
         </div>
       )}
-
-      {/* ── CURSOR ── */}
-      <CustomCursor brand={brand} />
 
       {/* ── SCROLL CONTAINER ── */}
       <div
@@ -763,15 +760,15 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div className="ru hero-stats-row" style={{ animationDelay: "0.16s", display: "flex", gap: "0", marginBottom: "36px" }}>
                   {grocer.contextStat.map((s, i) => (
                     <div key={i} className="hero-stat-item" style={{ paddingRight: "48px", marginRight: "48px", borderRight: i < grocer.contextStat.length - 1 ? "1px solid rgba(0,0,0,0.08)" : "none" }}>
-                      <div className="hero-stat-num" style={{ fontSize: "clamp(2.2rem,4vw,4.8rem)", fontWeight: 900, color: i === 0 ? brand : "rgba(0,0,0,0.25)", letterSpacing: "-0.05em", lineHeight: 0.9, marginBottom: "10px" }}>
+                      <div className="hero-stat-num" style={{ fontSize: "clamp(2.2rem,4vw,4.8rem)", fontWeight: 900, color: i === 0 ? brand : "rgba(0,0,0,0.5)", letterSpacing: "-0.05em", lineHeight: 0.9, marginBottom: "10px" }}>
                         {s.value}
                       </div>
-                      <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.35)", lineHeight: 1.5, maxWidth: "200px" }}>{s.label}</div>
+                      <div style={{ fontSize: "14px", color: "rgba(0,0,0,0.6)", lineHeight: 1.5, maxWidth: "200px", textWrap: "balance" } as React.CSSProperties}>{s.label}</div>
                     </div>
                   ))}
                 </div>
                 <div className="ru hero-bottom-row" style={{ animationDelay: "0.2s", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "40px" }}>
-                  <p style={{ fontSize: "clamp(0.9rem,1.1vw,1rem)", color: "rgba(0,0,0,0.45)", lineHeight: 1.75, maxWidth: "480px", margin: 0 }}>
+                  <p style={{ fontSize: "clamp(1rem,1.2vw,1.1rem)", color: "rgba(0,0,0,0.65)", lineHeight: 1.75, maxWidth: "480px", margin: 0 }}>
                     {grocer.heroSubheadline}
                   </p>
                   <button onClick={() => scrollTo(1)} style={{ flexShrink: 0, padding: "14px 32px", borderRadius: "7px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", boxShadow: `0 4px 20px ${rgba(brand, 0.3)}` }}>
@@ -782,7 +779,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
               <div style={{ height: "1px", background: "rgba(0,0,0,0.07)", position: "relative", zIndex: 2 }} />
               <div style={{ padding: "12px 8vw", display: "flex", justifyContent: "flex-end", position: "relative", zIndex: 2 }}>
-                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.38)" }}>131 retail executives · 2,533 shoppers</span>
+                <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.55)" }}>131 retail executives · 2,533 shoppers</span>
               </div>
             </section>
 
@@ -812,7 +809,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         return (
                           <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexShrink: 0 }}>
                             <span style={{ fontSize: "clamp(3rem,5vw,5.5rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: brand }}>{vsMatch[1]}%</span>
-                            <span style={{ fontSize: "clamp(0.85rem,1.1vw,1rem)", fontWeight: 600, color: "rgba(0,0,0,0.25)", letterSpacing: "0.06em", textTransform: "uppercase" }}>vs.</span>
+                            <span style={{ fontSize: "clamp(0.85rem,1.1vw,1rem)", fontWeight: 600, color: "rgba(0,0,0,0.5)", letterSpacing: "0.06em", textTransform: "uppercase" }}>vs.</span>
                             <span style={{ fontSize: "clamp(2rem,3.5vw,4rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: "rgba(0,0,0,0.2)" }}>{vsMatch[2]}%</span>
                           </div>
                         );
@@ -832,7 +829,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       }
                       return <div style={{ fontSize: "clamp(3.5rem,6vw,7rem)", fontWeight: 900, lineHeight: 1, letterSpacing: "-0.06em", color: brand, flexShrink: 0 }}>{p.stat}</div>;
                     })()}
-                    <p style={{ fontSize: "clamp(1rem,1.15vw,1.15rem)", color: "rgba(0,0,0,0.4)", lineHeight: 1.4, maxWidth: "160px", margin: 0 }}>{p.statLabel}</p>
+                    <p style={{ fontSize: "clamp(1rem,1.15vw,1.15rem)", color: "rgba(0,0,0,0.6)", lineHeight: 1.4, maxWidth: "240px", margin: 0, textWrap: "balance" } as React.CSSProperties}>{p.statLabel}</p>
                   </div>
                   <div className="reveal reveal-d2" style={{ height: "1px", background: "rgba(0,0,0,0.07)" }} />
                   <div className="reveal reveal-d3">
@@ -846,7 +843,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       ))}
                     </div>
                   </div>
-                  <p style={{ fontSize: "11px", color: "rgba(0,0,0,0.25)", fontStyle: "italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
+                  <p style={{ fontSize: "11px", color: "rgba(0,0,0,0.5)", fontStyle: "italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
                 </div>
               );
 
@@ -873,7 +870,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div style={{ marginBottom: "36px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
                     <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
-                    <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>Next Steps</span>
+                    <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.9) }}>Next Steps</span>
                   </div>
                   <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#0a0a0a", margin: 0, maxWidth: "720px" }}>
                     The gap between{" "}
@@ -892,11 +889,11 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   {[
                     { v: "131", l: "Retail Executives" },
                     { v: "2,533", l: "Shoppers Surveyed" },
-                    { v: "10", l: "Retailers Benchmarked" },
+                    
                   ].map((chip) => (
                     <div key={chip.v} className="attr-pill" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.15)}`, flexShrink: 0 }}>
                       <span style={{ fontSize: "13px", fontWeight: 900, color: brand, lineHeight: 1, letterSpacing: "-.04em" }}>{chip.v}</span>
-                      <span style={{ fontSize: "9px", color: "rgba(0,0,0,.4)", letterSpacing: ".04em" }}>{chip.l}</span>
+                      <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.6)", letterSpacing: ".04em" }}>{chip.l}</span>
                     </div>
                   ))}
                   <div style={{ flex: 1, height: "1px", background: `linear-gradient(90deg,transparent,${rgba(brand,.1)})` }} />
@@ -913,9 +910,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brand} strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: rgba(brand,.5), marginBottom: "6px" }}>Full Report</div>
+                        <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: rgba(brand,.85), marginBottom: "6px" }}>Full Report</div>
                         <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#0a0a0a", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
-                        <div style={{ fontSize: "11px", color: "rgba(0,0,0,.45)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                        <div style={{ fontSize: "11px", color: "rgba(0,0,0,.7)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
                       </div>
                       <div style={{ flex: 1 }} />
                       <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: brand, border: "none", color: "#fff", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "background .2s", display: "flex", alignItems: "center", gap: "7px", boxShadow: `0 4px 16px ${rgba(brand,.25)}` }}
@@ -935,9 +932,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={brand} strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                       </div>
                       <div>
-                        <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: rgba(brand,.5), marginBottom: "6px" }}>Expert Walkthrough</div>
+                        <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: rgba(brand,.85), marginBottom: "6px" }}>Expert Walkthrough</div>
                         <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#0a0a0a", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>30-Min Strategy Call</div>
-                        <div style={{ fontSize: "11px", color: "rgba(0,0,0,.45)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                        <div style={{ fontSize: "11px", color: "rgba(0,0,0,.7)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
                       </div>
                       <div style={{ flex: 1 }} />
                       <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.35)}`, color: brand, cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
@@ -963,8 +960,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
                 <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", opacity: 0.4 }} />
-                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.38)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-                <span style={{ fontSize: "9px", color: "rgba(0,0,0,0.3)" }}>© 2025 Incisiv</span>
+                <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.55)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
+                <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.55)" }}>© 2025 Incisiv</span>
               </div>
             </section>
           </>
@@ -1007,7 +1004,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {/* Eyebrow badge */}
                 <div className="reveal" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "5px 14px 5px 10px", borderRadius: "20px", background: rgba(brand, .1), border: `1px solid ${rgba(brand, .32)}`, marginBottom: "24px", alignSelf: "flex-start" }}>
                   <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: brand, animation: "blink 2s ease-in-out infinite" }} />
-                  <span style={{ fontFamily: "var(--font-heading),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".15em", textTransform: "uppercase", color: brandLight }}>
+                  <span style={{ fontFamily: "var(--font-heading),sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: ".15em", textTransform: "uppercase", color: brandLight }}>
                     Diebold Nixdorf &nbsp;·&nbsp; SSEB 2025
                   </span>
                 </div>
@@ -1037,7 +1034,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <p className="reveal reveal-d2" style={{
                   fontFamily: "var(--font-sans),sans-serif",
                   fontSize: "clamp(.95rem,1.05vw,1.05rem)",
-                  color: "rgba(220,215,255,.45)", lineHeight: 1.75,
+                  color: "rgba(220,215,255,.75)", lineHeight: 1.75,
                   maxWidth: "580px", marginBottom: "32px",
                 }}>
                   {grocer.heroSubheadline}
@@ -1061,7 +1058,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     ].map((m, mi) => (
                       <div key={mi} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px", background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.07)" }}>
                         <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="rgba(167,139,250,.6)" strokeWidth={1.8}>{m.icon}</svg>
-                        <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", color: "rgba(220,215,255,.4)" }}>{m.label}</span>
+                        <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", color: "rgba(220,215,255,.7)" }}>{m.label}</span>
                       </div>
                     ))}
                   </div>
@@ -1089,7 +1086,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       {/* Thin accent line */}
                       <div style={{ width: "28px", height: "2px", borderRadius: "1px", background: si === 0 ? brand : "#7c3aed", opacity: .6 }} />
                       {/* Label */}
-                      <p style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.45)", lineHeight: 1.5 }}>
+                      <p style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.75)", lineHeight: 1.5 }}>
                         {s.label}
                       </p>
                     </div>
@@ -1098,8 +1095,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* Scroll hint */}
                 <div className="reveal reveal-d2" style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "18px" }}>
-                  <div style={{ width: "16px", height: "1px", background: "rgba(220,215,255,.25)" }} />
-                  <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.35)", letterSpacing: ".12em", textTransform: "uppercase" }}>
+                  <div style={{ width: "16px", height: "1px", background: "rgba(220,215,255,.55)" }} />
+                  <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.7)", letterSpacing: ".12em", textTransform: "uppercase" }}>
                     Scroll to explore {total} findings
                   </span>
                 </div>
@@ -1125,7 +1122,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   <div className="reveal reveal-d1" style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(4rem,8vw,9rem)", fontWeight:800, lineHeight:.85, color:brandLight, "--sb-color":rgba(brand,.5), animation:"statBreathe 2.5s ease-in-out infinite", marginBottom:"12px" } as React.CSSProperties}>
                     {p.stat}
                   </div>
-                  <p className="reveal reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"14px", color:"rgba(220,215,255,.5)", lineHeight:1.5, maxWidth:"220px", marginBottom:"28px" }}>{p.statLabel}</p>
+                  <p className="reveal reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"14px", color:"rgba(220,215,255,.8)", lineHeight:1.5, maxWidth:"220px", marginBottom:"28px" }}>{p.statLabel}</p>
                   <div className="reveal reveal-d2" style={{ height:"1px", background:`linear-gradient(90deg,${rgba(brand,.5)},transparent)`, marginBottom:"22px", width:"80%" }} />
 
                 </div>
@@ -1133,18 +1130,18 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {/* RIGHT — title + body + bullets */}
                 <div style={{ display:"flex", flexDirection:"column", justifyContent:"center", paddingLeft:"48px", gap:"20px" }}>
                   <h2 className="t2-section-heading reveal reveal-right" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)" }}>{p.hook}</h2>
-                  <p className="reveal reveal-right reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"clamp(.8rem,.9vw,.88rem)", color:"rgba(220,215,255,.5)", lineHeight:1.85 }}>{p.body}</p>
+                  <p className="reveal reveal-right reveal-d1" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(220,215,255,.8)", lineHeight:1.85 }}>{p.body}</p>
                   <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
                     {p.bullets.map((b, bi) => (
                       <div key={bi} className="t2-keynote reveal reveal-right reveal-d2" style={{ "--sb-color":rgba(brand,.4) } as React.CSSProperties}>
-                        <div style={{ width:"22px", height:"22px", borderRadius:"6px", background:rgba(brand,.14), border:`1px solid ${rgba(brand,.35)}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontFamily:"var(--font-heading),sans-serif", fontSize:"9px", fontWeight:800, color:brandLight }}>
+                        <div style={{ width:"22px", height:"22px", borderRadius:"6px", background:rgba(brand,.14), border:`1px solid ${rgba(brand,.35)}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontFamily:"var(--font-heading),sans-serif", fontSize:"11px", fontWeight:800, color:brandLight }}>
                           {String(bi+1).padStart(2,"0")}
                         </div>
-                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.45)", lineHeight:1.65 }}>{b}</p>
+                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.75)", lineHeight:1.65 }}>{b}</p>
                       </div>
                     ))}
                   </div>
-                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.7)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                 </div>
               </div>
             </section>
@@ -1170,11 +1167,11 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   {/* Stat card */}
                   <div className="t2-bento" style={{ padding:"20px", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", textAlign:"center", gap:"10px" }}>
                     <StatViz stat={p.stat} brand={brand} size={88} />
-                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.45)", lineHeight:1.5 }}>{p.statLabel}</p>
+                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.75)", lineHeight:1.5 }}>{p.statLabel}</p>
                   </div>
                   {/* Body card */}
                   <div className="t2-bento" style={{ padding:"20px 22px", display:"flex", flexDirection:"column", justifyContent:"center" }}>
-                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.5)", lineHeight:1.85 }}>{p.body}</p>
+                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.8)", lineHeight:1.85 }}>{p.body}</p>
                   </div>
                   {/* Bullets card */}
                   <div className="t2-bento" style={{ padding:"18px 20px", display:"flex", flexDirection:"column", gap:"10px", justifyContent:"center" }}>
@@ -1183,12 +1180,12 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         <div style={{ width:"14px", height:"14px", borderRadius:"50%", background:rgba(brand,.18), border:`1px solid ${rgba(brand,.4)}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:"2px" }}>
                           <div style={{ width:"5px", height:"5px", borderRadius:"50%", background:brand }} />
                         </div>
-                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.42)", lineHeight:1.6 }}>{b}</p>
+                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.72)", lineHeight:1.6 }}>{b}</p>
                       </div>
                     ))}
                   </div>
                 </div>
-                <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.7)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
               </div>
             </section>
             ); })()}
@@ -1208,7 +1205,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div className="reveal" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingBottom:"20px", borderBottom:`1px solid rgba(124,58,237,.2)`, marginBottom:"20px" }}>
                   <div style={{ display:"flex", alignItems:"baseline", gap:"12px" }}>
                     <span style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(3rem,6vw,6.5rem)", fontWeight:800, lineHeight:.9, color:brandLight, "--sb-color":rgba(brand,.5), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>{p.stat}</span>
-                    <span style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.4)", maxWidth:"180px", lineHeight:1.4 }}>{p.statLabel}</span>
+                    <span style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.7)", maxWidth:"260px", lineHeight:1.4, textWrap:"balance" } as React.CSSProperties}>{p.statLabel}</span>
                   </div>
                   <p className="t2-section-label" style={{ margin:0, textAlign:"right" }}>{p.title}</p>
                 </div>
@@ -1216,7 +1213,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 {/* ── Row 2: title + body side by side ── */}
                 <div className="reveal reveal-d1" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"40px", marginBottom:"24px" }}>
                   <h2 className="t2-section-heading" style={{ fontSize:"clamp(1.8rem,2.6vw,2.8rem)", margin:0 }}>{p.hook}</h2>
-                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.48)", lineHeight:1.85, margin:0, alignSelf:"center" }}>{p.body}</p>
+                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.78)", lineHeight:1.85, margin:0, alignSelf:"center" }}>{p.body}</p>
                 </div>
 
                 {/* ── Row 3: pull-quote between rules ── */}
@@ -1227,12 +1224,12 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   {p.bullets.map((b, bi) => (
                     <div key={bi} style={{ padding:`14px ${bi===1?"28px":"0"} 14px ${bi===0?"0":"28px"}`, borderLeft: bi>0 ? `1px solid rgba(124,58,237,.15)` : "none", display:"flex", flexDirection:"column", gap:"8px" }}>
                       <div style={{ width:"24px", height:"2px", background: bi===0 ? brand : bi===1 ? "#7c3aed" : brandLight }} />
-                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.48)", lineHeight:1.65, margin:0 }}>{b}</p>
+                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.78)", lineHeight:1.65, margin:0 }}>{b}</p>
                     </div>
                   ))}
                 </div>
 
-                <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.15)", fontStyle:"italic", marginTop:"16px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.55)", fontStyle:"italic", marginTop:"16px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
               </div>
             </section>
             ); })()}
@@ -1254,7 +1251,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   <h2 className="t2-section-heading reveal reveal-d1" style={{ fontSize:"clamp(2rem,2.8vw,3rem)" }}>{p.hook}</h2>
                   <div className="reveal reveal-d2" style={{ height:"1px", background:`linear-gradient(90deg,${rgba(brand,.5)},transparent)` }} />
 
-                  <p className="reveal reveal-d3" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.45)", lineHeight:1.85 }}>{p.body}</p>
+                  <p className="reveal reveal-d3" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.75)", lineHeight:1.85 }}>{p.body}</p>
                 </div>
 
                 {/* Right — stat large + keynote rows */}
@@ -1264,7 +1261,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     <StatViz stat={p.stat} brand={brand} size={120} />
                     <div>
                       <div style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"12px", fontWeight:700, letterSpacing:".12em", color:rgba(brand,.7), textTransform:"uppercase", marginBottom:"8px" }}>By the numbers</div>
-                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.4)", lineHeight:1.6, maxWidth:"260px" }}>{p.statLabel}</p>
+                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.75)", lineHeight:1.6, maxWidth:"260px", textWrap:"balance" } as React.CSSProperties}>{p.statLabel}</p>
                     </div>
                   </div>
                   {/* Keynote rows */}
@@ -1273,10 +1270,10 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       <div style={{ width:"20px", height:"20px", borderRadius:"50%", background:rgba(brand,.14), border:`1px solid ${rgba(brand,.35)}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                         <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brand }} />
                       </div>
-                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.45)", lineHeight:1.65 }}>{b}</p>
+                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.75)", lineHeight:1.65 }}>{b}</p>
                     </div>
                   ))}
-                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.7)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                 </div>
               </div>
             </section>
@@ -1305,7 +1302,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   </div>
                   <div style={{ paddingBottom:"8px" }}>
                     <div style={{ height:"2px", width:"48px", background:brand, marginBottom:"10px" }} />
-                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"14px", color:"rgba(220,215,255,.5)", lineHeight:1.5, maxWidth:"200px" }}>{p.statLabel}</p>
+                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"14px", color:"rgba(220,215,255,.8)", lineHeight:1.5, maxWidth:"280px", textWrap:"balance" } as React.CSSProperties}>{p.statLabel}</p>
                   </div>
                 </div>
 
@@ -1315,17 +1312,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
                 {/* 2-col: body + bullets */}
                 <div className="reveal reveal-d3" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"24px", paddingTop:"4px" }}>
-                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.45)", lineHeight:1.85 }}>{p.body}</p>
+                  <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.75)", lineHeight:1.85 }}>{p.body}</p>
                   <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
                     {p.bullets.map((b, bi) => (
                       <div key={bi} className="t2-keynote" style={{ "--sb-color":rgba(brand,.5) } as React.CSSProperties}>
                         <div style={{ width:"20px", height:"20px", borderRadius:"50%", background:rgba(brand,.2), border:`1px solid ${rgba(brand,.45)}`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                           <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:brandLight }} />
                         </div>
-                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.5)", lineHeight:1.65 }}>{b}</p>
+                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.8)", lineHeight:1.65 }}>{b}</p>
                       </div>
                     ))}
-                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
+                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.7)", fontStyle:"italic", marginTop:"4px" }}>Source: SSEB 2025 · 131 executives · 2,533 shoppers</p>
                   </div>
                 </div>
               </div>
@@ -1361,7 +1358,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         <div style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"12px", fontWeight:700, letterSpacing:".1em", color:rgba(brand,.6), marginBottom:"5px", textTransform:"uppercase" }}>
                           {bi===0?"Recognize":bi===1?"Prioritize":"Execute"}
                         </div>
-                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.45)", lineHeight:1.65 }}>{b}</p>
+                        <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:".92rem", color:"rgba(220,215,255,.75)", lineHeight:1.65 }}>{b}</p>
                       </div>
                     </div>
                   ))}
@@ -1374,16 +1371,16 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
 
                   {/* Body */}
-                  <p className="reveal reveal-right reveal-d2" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.45)", lineHeight:1.85 }}>{p.body}</p>
+                  <p className="reveal reveal-right reveal-d2" style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"1rem", color:"rgba(220,215,255,.75)", lineHeight:1.85 }}>{p.body}</p>
 
                   {/* Stat + source row */}
                   <div className="reveal reveal-right reveal-d3" style={{ display:"flex", alignItems:"center", gap:"20px", paddingTop:"8px", borderTop:`1px solid rgba(124,58,237,.15)` }}>
                     <div>
                       <div style={{ fontFamily:"var(--font-heading),sans-serif", fontSize:"clamp(1.8rem,2.8vw,3rem)", fontWeight:800, color:brandLight, "--sb-color":rgba(brand,.5), animation:"statBreathe 2.5s ease-in-out infinite", lineHeight:1 } as React.CSSProperties}>{p.stat}</div>
-                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.45)", lineHeight:1.4, maxWidth:"180px", marginTop:"4px" }}>{p.statLabel}</p>
+                      <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"13px", color:"rgba(220,215,255,.75)", lineHeight:1.4, maxWidth:"260px", marginTop:"4px", textWrap:"balance" } as React.CSSProperties}>{p.statLabel}</p>
                     </div>
                     <div style={{ flex:1, height:"1px", background:`linear-gradient(90deg,${rgba(brand,.3)},transparent)` }} />
-                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.38)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives</p>
+                    <p style={{ fontFamily:"var(--font-sans),sans-serif", fontSize:"11px", color:"rgba(220,215,255,.7)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 executives</p>
                   </div>
                 </div>
               </div>
@@ -1418,7 +1415,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                 <div className="reveal" style={{ marginBottom: "36px" }}>
                   <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
                     <div style={{ width: "20px", height: "1px", background: rgba(brand,.6) }} />
-                    <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>Next Steps</span>
+                    <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.9) }}>Next Steps</span>
                   </div>
                   <h2 style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 700, lineHeight: 1.0, letterSpacing: "-.01em", textTransform: "uppercase", color: "#f0eeff", margin: 0, maxWidth: "720px" }}>
                     The gap between{" "}
@@ -1437,11 +1434,11 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   {[
                     { v: "131", l: "Retail Executives" },
                     { v: "2,533", l: "Shoppers Surveyed" },
-                    { v: "10", l: "Retailers Benchmarked" },
+                    
                   ].map((chip) => (
                     <div key={chip.v} className="attr-pill" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.06), border: `1px solid ${rgba(brand,.18)}`, flexShrink: 0 }}>
                       <span style={{ fontFamily: "var(--font-heading),sans-serif", fontSize: "13px", fontWeight: 800, color: brandLight, lineHeight: 1 }}>{chip.v}</span>
-                      <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.35)", letterSpacing: ".05em" }}>{chip.l}</span>
+                      <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.7)", letterSpacing: ".05em" }}>{chip.l}</span>
                     </div>
                   ))}
                   <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg,transparent,rgba(109,40,217,.1))" }} />
@@ -1460,9 +1457,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         </svg>
                       </div>
                       <div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.35)", marginBottom: "6px" }}>Full Report</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.7)", marginBottom: "6px" }}>Full Report</div>
                         <div style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700, color: "#f0eeff", lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-.01em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.42)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.72)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
                       </div>
                       <div style={{ flex: 1 }} />
                       <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: brandLight, border: "none", color: "#0a0012", cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "opacity .2s", display: "flex", alignItems: "center", gap: "7px", boxShadow: `0 4px 20px ${rgba(brand,.35)}` }}
@@ -1484,9 +1481,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                         </svg>
                       </div>
                       <div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.35)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(220,215,255,.7)", marginBottom: "6px" }}>Expert Walkthrough</div>
                         <div style={{ fontFamily: "var(--font-display),sans-serif", fontSize: "clamp(1.1rem,1.6vw,1.5rem)", fontWeight: 700, color: "#f0eeff", lineHeight: 1.1, textTransform: "uppercase", letterSpacing: "-.01em", marginBottom: "8px" }}>30-Min Strategy Call</div>
-                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.42)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                        <div style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.72)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
                       </div>
                       <div style={{ flex: 1 }} />
                       <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.38)}`, color: brandLight, cursor: "pointer", fontFamily: "var(--font-sans),sans-serif", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
@@ -1512,8 +1509,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
               <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px max(32px,calc(50vw - 620px))", borderTop: "1px solid rgba(109,40,217,.15)", display: "flex", justifyContent: "space-between" }}>
                 <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
-                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.35)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "9px", color: "rgba(220,215,255,.25)" }}>© 2025 Incisiv</span>
+                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.7)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
+                <span style={{ fontFamily: "var(--font-sans),sans-serif", fontSize: "11px", color: "rgba(220,215,255,.55)" }}>© 2025 Incisiv</span>
               </div>
             </section>
           </>
@@ -1546,7 +1543,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
             {/* Grocer logo + name */}
             <div className="ru" style={{ animationDelay:"0.06s", marginBottom:"20px" }}>
-              <img src={grocer.logoUrl} alt={grocer.shortName} style={{ height:`${grocer.logoHeight ?? 36}px`, width:"auto", maxWidth:"200px", objectFit:"contain", display:"block", filter: (!grocer.logoHasBg) ? "brightness(0) invert(1)" : "none", opacity: grocer.logoHasBg ? 1 : 0.9 }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+              <img src={grocer.logoUrl} alt={grocer.shortName} style={{ height:`${grocer.logoHeight ?? 36}px`, width:"auto", maxWidth:"200px", objectFit:"contain", display:"block", filter: grocer.id !== "heb" && grocer.id !== "aldi" ? "brightness(0) invert(1)" : "none", opacity: 0.9 }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
             </div>
 
             {/* Main headline — full width, very large */}
@@ -1561,17 +1558,17 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <div className="ru hero-stats-row" style={{ animationDelay:"0.16s", display:"flex", gap:"0", marginBottom:"36px" }}>
               {grocer.contextStat.map((s, i) => (
                 <div key={i} className="hero-stat-item" style={{ paddingRight:"48px", marginRight:"48px", borderRight: i < grocer.contextStat.length-1 ? "1px solid rgba(255,255,255,0.07)" : "none" }}>
-                  <div className="hero-stat-num" style={{ fontSize:"clamp(2.2rem,4vw,4.8rem)", fontWeight:900, color: i===0 ? brandLight : "rgba(255,255,255,0.5)", letterSpacing:"-0.05em", lineHeight:0.9, marginBottom:"10px" }}>
+                  <div className="hero-stat-num" style={{ fontSize:"clamp(2.2rem,4vw,4.8rem)", fontWeight:900, color: i===0 ? brandLight : "rgba(255,255,255,0.75)", letterSpacing:"-0.05em", lineHeight:0.9, marginBottom:"10px" }}>
                     {s.value}
                   </div>
-                  <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.28)", lineHeight:1.5, maxWidth:"200px" }}>{s.label}</div>
+                  <div style={{ fontSize:"14px", color:"rgba(255,255,255,0.6)", lineHeight:1.5, maxWidth:"200px", textWrap:"balance" } as React.CSSProperties}>{s.label}</div>
                 </div>
               ))}
             </div>
 
             {/* Subheadline + CTA row */}
             <div className="ru hero-bottom-row" style={{ animationDelay:"0.2s", display:"flex", alignItems:"flex-end", justifyContent:"space-between", gap:"40px" }}>
-              <p style={{ fontSize:"clamp(0.9rem,1.1vw,1rem)", color:"rgba(255,255,255,0.32)", lineHeight:1.75, maxWidth:"480px", margin:0 }}>
+              <p style={{ fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.65)", lineHeight:1.75, maxWidth:"480px", margin:0 }}>
                 {grocer.heroSubheadline}
               </p>
               <button onClick={() => scrollTo(1)} style={{ flexShrink:0, padding:"14px 32px", borderRadius:"7px", background:brand, border:"none", color:"#fff", cursor:"pointer", fontSize:"11px", fontWeight:800, letterSpacing:"0.12em", textTransform:"uppercase", boxShadow:`0 0 32px ${rgba(brand,0.45)}` }}>
@@ -1583,7 +1580,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
           {/* Bottom rule */}
           <div style={{ height:"1px", background:"rgba(255,255,255,0.04)", position:"relative", zIndex:2 }} />
           <div style={{ padding:"12px 8vw", display:"flex", justifyContent:"flex-end", position:"relative", zIndex:2 }}>
-            <span style={{ fontSize:"9px", color:"rgba(255,255,255,0.35)" }}>131 retail executives · 2,533 shoppers</span>
+            <span style={{ fontSize:"11px", color:"rgba(255,255,255,0.65)" }}>131 retail executives · 2,533 shoppers</span>
           </div>
 
         </section>
@@ -1604,7 +1601,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               </div>
               <WordFadeTitle text={p.hook} style={{ fontSize:"clamp(1.9rem,2.8vw,3rem)", fontWeight:900, color:"#fff", lineHeight:1.05, letterSpacing:"-0.04em", margin:0 }} />
               <div className="rfi" style={{ animationDelay:"0.14s", height:"1px", background:`linear-gradient(90deg,${isA?"":"transparent,"}${rgba(brand,0.4)}${isA?",transparent":""})`}} />
-              <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.5)", lineHeight:1.9, margin:0 }}>{p.body}</p>
+              <p className="ru" style={{ animationDelay:"0.16s", fontSize:"clamp(1rem,1.2vw,1.1rem)", color:"rgba(255,255,255,0.75)", lineHeight:1.9, margin:0 }}>{p.body}</p>
             </div>
           );
 
@@ -1619,7 +1616,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                       <div style={{ display:"flex", alignItems:"baseline", gap:"8px", flexShrink:0, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite" } as React.CSSProperties}>
                         <CountUpStat value={parseInt(vsMatch[1])} style={{ fontSize:"clamp(3rem,5vw,5.5rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight }} />
                         <span style={{ fontSize:"clamp(0.85rem,1.1vw,1rem)", fontWeight:600, color:"rgba(255,255,255,0.3)", letterSpacing:"0.06em", textTransform:"uppercase" }}>vs.</span>
-                        <CountUpStat value={parseInt(vsMatch[2])} style={{ fontSize:"clamp(2rem,3.5vw,4rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:"rgba(255,255,255,0.35)" }} />
+                        <CountUpStat value={parseInt(vsMatch[2])} style={{ fontSize:"clamp(2rem,3.5vw,4rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:"rgba(255,255,255,0.65)" }} />
                       </div>
                     );
                   }
@@ -1637,7 +1634,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   }
                   return <div style={{ fontSize:"clamp(3.5rem,6vw,7rem)", fontWeight:900, lineHeight:1, letterSpacing:"-0.06em", color:brandLight, "--sb-color":rgba(brand,.55), animation:"statBreathe 2.5s ease-in-out infinite", flexShrink:0 } as React.CSSProperties}>{p.stat}</div>;
                 })()}
-                <p style={{ fontSize:"clamp(1rem,1.15vw,1.15rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.4, maxWidth:"160px", margin:0 }}>{p.statLabel}</p>
+                <p style={{ fontSize:"clamp(1rem,1.15vw,1.15rem)", color:"rgba(255,255,255,0.55)", lineHeight:1.4, maxWidth:"240px", margin:0, textWrap:"balance" } as React.CSSProperties}>{p.statLabel}</p>
               </div>
               <div className="rfi" style={{ animationDelay:"0.16s", height:"1px", background:"rgba(255,255,255,0.06)" }} />
               {/* Bullets in a box — animated border + scroll-reveal stagger */}
@@ -1650,7 +1647,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize:"11px", color:"rgba(255,255,255,0.2)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
+              <p style={{ fontSize:"11px", color:"rgba(255,255,255,0.55)", fontStyle:"italic" }}>Source: SSEB 2025 · 131 retail executives · 2,533 shoppers</p>
             </div>
           );
 
@@ -1678,7 +1675,7 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
             <div style={{ marginBottom: "36px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
                 <div style={{ width: "20px", height: "1px", background: rgba(brand,.55) }} />
-                <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.55) }}>Next Steps</span>
+                <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: rgba(brand,.9) }}>Next Steps</span>
               </div>
               <h2 style={{ fontSize: "clamp(2.2rem,3.6vw,4.2rem)", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.04em", color: "#fff", margin: 0, maxWidth: "720px" }}>
                 The gap between{" "}
@@ -1697,11 +1694,11 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
               {[
                 { v: "131", l: "Retail Executives" },
                 { v: "2,533", l: "Shoppers Surveyed" },
-                { v: "10", l: "Retailers Benchmarked" },
+                
               ].map((chip) => (
                 <div key={chip.v} className="attr-pill" style={{ display: "flex", alignItems: "center", gap: "7px", padding: "6px 14px", borderRadius: "20px", background: rgba(brand,.05), border: `1px solid ${rgba(brand,.14)}`, flexShrink: 0 }}>
                   <span style={{ fontSize: "13px", fontWeight: 900, color: brandLight, lineHeight: 1, letterSpacing: "-.04em" }}>{chip.v}</span>
-                  <span style={{ fontSize: "9px", color: "rgba(255,255,255,.3)", letterSpacing: ".04em" }}>{chip.l}</span>
+                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,.6)", letterSpacing: ".04em" }}>{chip.l}</span>
                 </div>
               ))}
               <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg,transparent,rgba(27,79,155,.08))" }} />
@@ -1720,9 +1717,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.32)", marginBottom: "6px" }}>Full Report</div>
+                    <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.65)", marginBottom: "6px" }}>Full Report</div>
                     <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>Access the Complete Benchmark</div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.42)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.72)", lineHeight: 1.65 }}>Maturity framework, retailer-by-retailer comparisons, and a prioritized roadmap built for your scale.</div>
                   </div>
                   <div style={{ flex: 1 }} />
                   <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: brandLight, border: "none", color: "#0a0012", cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "opacity .2s", display: "flex", alignItems: "center", gap: "7px", boxShadow: `0 4px 20px ${rgba(brand,.35)}` }}
@@ -1744,9 +1741,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
                     </svg>
                   </div>
                   <div>
-                    <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.32)", marginBottom: "6px" }}>Expert Walkthrough</div>
+                    <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "rgba(255,255,255,.65)", marginBottom: "6px" }}>Expert Walkthrough</div>
                     <div style={{ fontSize: "clamp(1rem,1.5vw,1.4rem)", fontWeight: 900, color: "#fff", lineHeight: 1.1, letterSpacing: "-.03em", marginBottom: "8px" }}>30-Min Strategy Call</div>
-                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.42)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,.72)", lineHeight: 1.65 }}>A Diebold Nixdorf consultant walks you through the findings most relevant to {grocer.shortName}&apos;s operations.</div>
                   </div>
                   <div style={{ flex: 1 }} />
                   <button style={{ alignSelf: "flex-start", padding: "10px 24px", borderRadius: "7px", background: "transparent", border: `1px solid ${rgba(brand,.38)}`, color: brandLight, cursor: "pointer", fontSize: "10px", fontWeight: 700, letterSpacing: ".1em", textTransform: "uppercase", transition: "all .2s", display: "flex", alignItems: "center", gap: "7px" }}
@@ -1762,9 +1759,9 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
             {/* Back to top */}
             <div style={{ marginTop: "24px", display: "flex", justifyContent: "center" }}>
-              <button onClick={() => scrollTo(0)} style={{ padding: "7px 16px", borderRadius: "7px", background: "none", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: "10px", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", transition: "all 0.15s" }}
+              <button onClick={() => scrollTo(0)} style={{ padding: "7px 16px", borderRadius: "7px", background: "none", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: "10px", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", transition: "all 0.15s" }}
                 onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "rgba(255,255,255,0.07)"; b.style.color = "rgba(255,255,255,0.85)"; }}
-                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "none"; b.style.color = "rgba(255,255,255,0.5)"; }}>
+                onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.background = "none"; b.style.color = "rgba(255,255,255,0.75)"; }}>
                 ↑ Back to Top
               </button>
             </div>
@@ -1773,8 +1770,8 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
 
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 8vw", borderTop: "1px solid rgba(255,255,255,0.07)", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
             <Image src="/diebold-nixdorf-logo.png" alt="Diebold Nixdorf" width={24} height={18} style={{ objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.4 }} />
-            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.35)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
-            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.25)" }}>© 2025 Incisiv</span>
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)" }}>SSEB 2025 · Personalized for {grocer.name}</span>
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)" }}>© 2025 Incisiv</span>
           </div>
         </section>
 
@@ -1785,39 +1782,3 @@ export default function GrocerPageClient({ grocer }: { grocer: GrocerData }) {
   );
 }
 
-function CustomCursor({ brand }: { brand: string }) {
-  const brandLight = lighten(brand);
-  const [pos, setPos] = useState({ x: -100, y: -100 });
-  const [down, setDown] = useState(false);
-  useEffect(() => {
-    const m = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
-    const d = () => setDown(true);
-    const u = () => setDown(false);
-    window.addEventListener("mousemove", m);
-    window.addEventListener("mousedown", d);
-    window.addEventListener("mouseup", u);
-    return () => {
-      window.removeEventListener("mousemove", m);
-      window.removeEventListener("mousedown", d);
-      window.removeEventListener("mouseup", u);
-    };
-  }, []);
-  return (
-    <>
-      <div style={{
-        position: "fixed", zIndex: 9999, pointerEvents: "none",
-        left: pos.x, top: pos.y,
-        width: down ? "22px" : "30px", height: down ? "22px" : "30px",
-        borderRadius: "50%", border: `1px solid ${rgba(brand, 0.45)}`,
-        transform: "translate(-50%,-50%)",
-        transition: "width 0.12s, height 0.12s",
-      }} />
-      <div style={{
-        position: "fixed", zIndex: 9999, pointerEvents: "none",
-        left: pos.x, top: pos.y,
-        width: "3px", height: "3px", borderRadius: "50%",
-        background: brandLight, transform: "translate(-50%,-50%)",
-      }} />
-    </>
-  );
-}

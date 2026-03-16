@@ -113,10 +113,9 @@ export default function HomePage() {
         className="shrink-0 px-6 py-5 relative z-10"
         style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
       >
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div />
+        <div className="max-w-5xl mx-auto flex justify-center">
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-            Research conducted June–July 2025 · © 2025 Incisiv. All rights reserved.
+            © 2025 Incisiv. All rights reserved.
           </p>
         </div>
       </footer>
